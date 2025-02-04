@@ -18,7 +18,6 @@ define('APP_LOG_PATH', __DIR__ . '/../logs/app.log');
 
 // Configurations liées à la sécurité
 define('SESSION_LIFETIME', 3600); // Durée de session en secondes (1 heure)
-define('CSRF_TOKEN_SECRET', 'your_csrf_secret_key');
 
 // Initialiser une connexion PDO à la base de données
 try {
