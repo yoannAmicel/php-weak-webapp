@@ -18,7 +18,7 @@ if ($action === 'contact.submit') {
         exit; // Terminer après le traitement de l'action
     } else {
         http_response_code(405); // Méthode non autorisée
-        die('Méthode non autorisée');
+        die('Method not autorised');
     }
 }
 
