@@ -8,10 +8,16 @@
     <title>Register</title>
 </head>
 
+<?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+?>
+
 <body class="bg-gray-100 text-gray-900">
     <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg mt-20 mb-20">
         <h2 class="text-2xl font-bold mb-4">Register</h2>
-        <form method="POST" action="/actions/register.submit.php">
+        <form method="POST" action="?action=register.submit">
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                 <input id="name" type="text" name="name" value="<?= isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required

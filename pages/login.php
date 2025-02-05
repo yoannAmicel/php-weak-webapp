@@ -5,6 +5,12 @@
     include '../includes/header.php';
 ?>
 
+<?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+?>
+
 <head>
     <title>Login</title>
 </head>
@@ -13,6 +19,7 @@
     <div class="max-w-md mx-auto bg-white p-12 rounded-lg shadow-lg mt-20 mb-20">
         <h2 class="text-2xl font-bold mb-4">Login</h2>
 
+
         <?php if (!empty($_SESSION['status'])): ?>
             <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
                 <?= htmlspecialchars($_SESSION['status']); ?>
@@ -20,7 +27,25 @@
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="/actions/login.submit.php">
+        <!-- Register success -->
+        <?php if (!empty($_SESSION['register_success'])): ?>
+            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded mb-4">
+                <?= htmlspecialchars($_SESSION['register_success']) ?>
+            </div>
+            <?php unset($_SESSION['register_success']); ?>
+        <?php endif; ?>
+
+        <!-- Login failed -->
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4">
+                <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+
+
+        <form method="POST" action="?action=login.submit">
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
                 <input id="email" type="email" name="email" value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required
@@ -45,7 +70,7 @@
                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                     <label for="remember_me" class="ml-2 block text-sm text-gray-900">Remember me</label>
                 </div>
-                <a class="text-sm text-indigo-600 hover:text-indigo-500" href="/pages/password_reset.php">
+                <a class="text-sm text-indigo-600 hover:text-indigo-500" href="<?= route('forgot-password') ?>">
                     Forgot your password?
                 </a>
             </div>

@@ -5,22 +5,28 @@
 // Charger la configuration et les fonctions nécessaires
 require '../config/config.php';
 require '../functions/security.php';
-require '../functions/routes.php'; // Charger les routes
+require '../functions/routes.php'; 
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Récupérer la page ou l'action demandée dans l'URL
 $page = !empty($_GET['page']) ? htmlspecialchars($_GET['page'], ENT_QUOTES, 'UTF-8') : 'home';
 $action = isset($_GET['action']) ? htmlspecialchars($_GET['action'], ENT_QUOTES, 'UTF-8') : null;
 
 // Vérifier si c'est une action (soumission de formulaire)
-if ($action === 'contact.submit') {
+if (isset($action)) {
+    $actionFile = "../actions/" . $action . ".php";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        include '../actions/contact.submit.php';
+        include $actionFile;
         exit; // Terminer après le traitement de l'action
     } else {
         http_response_code(405); // Méthode non autorisée
         die('Method not autorised');
     }
 }
+
 
 // Vérifier si le fichier demandé existe dans les routes
 function loadPage($page) {

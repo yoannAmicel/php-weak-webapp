@@ -3,6 +3,12 @@
 
 <?php include_once '../functions/routes.php'; ?>
 
+<?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +26,7 @@
                 <span>Avenix</span>
             </a>
 
-            <!-- Navigation et bouton de connexion -->
+            <!-- Navigation et bouton de connexion/déconnexion -->
             <div class="flex items-center space-x-8">
                 <nav class="flex space-x-8">
                     <a href="<?= route('home') ?>" class="hover:text-gray-400">Home</a>
@@ -29,16 +35,28 @@
                     <a href="<?= route('contact') ?>" class="hover:text-gray-400">Contact</a>
                 </nav>
 
-                <!-- Bouton de connexion -->
-                <a href="<?= route('login') ?>" 
-                class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
-                    Connexion
-                </a>
+                <?php if (isset($_SESSION['user'])): ?>
+                    <!-- Formulaire pour déconnexion -->
+                    <form method="POST" action="/?action=logout" style="display: inline;">
+                        <button type="submit" 
+                                class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
+                            Logout
+                        </button>
+                    </form>
+                <?php else: ?>
+                    <!-- Bouton de connexion -->
+                    <a href="<?= route('login') ?>" 
+                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                        Connexion
+                    </a>
+                <?php endif; ?>
+
+
             </div>
         </div>
     </header>
 
-
     <div class="h-8"></div>
     <div class="h-8"></div>
-
+</body>
+</html>
