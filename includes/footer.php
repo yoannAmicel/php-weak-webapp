@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 
+<?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+?>
+
     <!-- Footer -->
     <footer class="bg-gray-200 py-6">
         <div class="container mx-auto text-center">

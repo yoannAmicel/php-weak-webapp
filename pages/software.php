@@ -8,6 +8,12 @@
     <title>Software</title>
 </head>
 
+<?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+?>
+
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-center mb-8">SOFTWARE</h1>
 

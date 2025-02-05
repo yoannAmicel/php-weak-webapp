@@ -1,5 +1,7 @@
 <?php
 
+require_once '../config/config.php';
+
 // Vérifier que la méthode HTTP est POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); // Méthode non autorisée

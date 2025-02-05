@@ -7,6 +7,7 @@ $routes = [
     'contact' => 'contact.php',
     'login' => 'login.php',
     'register' => 'register.php',
+    'forgot-password' => 'forgot.php',
 ];
 
 function route($name) {
