@@ -2,76 +2,54 @@
 
 <?php
     include '../includes/header.php';
+    require_once '../config/config.php'; // Inclusion du fichier de configuration
+    global $pdo;
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // Vérifier si la connexion PDO est définie
+    if (!isset($pdo)) {
+        die('Erreur : connexion à la base de données non définie.');
+    }
+
+    // Récupérer les données de la table software
+    try {
+        $query = $pdo->query("SELECT * FROM software");
+        $softwareItems = $query->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        die('Erreur lors de la récupération des données : ' . $e->getMessage());
+    }
 ?>
 
 <head>
     <title>Software</title>
 </head>
 
-<?php
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-?>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-8">SOFTWARE</h1>
 
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-8">SOFTWARE</h1>
-
-        <!-- List of Software -->
-        <div class="grid gap-6">
-            <!-- Software Item 1 -->
+    <!-- Liste des logiciels -->
+    <div class="grid gap-6">
+        <?php foreach ($softwareItems as $software): ?>
             <div class="bg-white rounded-lg shadow-md p-6 flex justify-between items-center">
                 <div class="flex-1 mr-4">
-                    <h2 class="text-xl font-bold text-gray-800">#PLANIT</h2>
+                    <h2 class="text-xl font-bold" style="color: <?= htmlspecialchars($software['title_color']) ?>">
+                        <?= htmlspecialchars($software['name']) ?>
+                    </h2>
                     <p class="text-gray-600">
-                        #PLANIT is an innovative planning and resource management tool designed for creative projects. It features advanced scheduling, team collaboration, and financial tracking to streamline your workflow.
+                        <?= htmlspecialchars($software['description']) ?>
                     </p>
                 </div>
-                <a href="#" class="flex-shrink-0 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-center">
+                <a href="<?= htmlspecialchars($software['more_info_url']) ?>" 
+                   class="flex-shrink-0 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-center">
                     More info
                 </a>
             </div>
-
-            <!-- Software Item 2 -->
-            <div class="bg-white rounded-lg shadow-md p-6 flex justify-between items-center">
-                <div class="flex-1 mr-4">
-                    <h2 class="text-xl font-bold text-orange-600">#WORKHUB</h2>
-                    <p class="text-gray-600">
-                        #WORKHUB is a personalized platform enabling employees to manage their schedules, track hours, and request time off seamlessly. Designed to enhance workplace efficiency.
-                    </p>
-                </div>
-                <a href="#" class="flex-shrink-0 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-center">
-                    More info
-                </a>
-            </div>
-
-            <!-- Software Item 3 -->
-            <div class="bg-white rounded-lg shadow-md p-6 flex justify-between items-center">
-                <div class="flex-1 mr-4">
-                    <h2 class="text-xl font-bold text-green-600">#SHAREPRO</h2>
-                    <p class="text-gray-600">
-                        #SHAREPRO is a collaborative sharing platform that empowers teams to exchange critical information, organize projects, and drive innovation effortlessly.
-                    </p>
-                </div>
-                <a href="#" class="flex-shrink-0 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-center">
-                    More info
-                </a>
-            </div>
-
-            <!-- Software Item 4 -->
-            <div class="bg-white rounded-lg shadow-md p-6 flex justify-between items-center">
-                <div class="flex-1 mr-4">
-                    <h2 class="text-xl font-bold text-gray-800">#ASSISTO</h2>
-                    <p class="text-gray-600">
-                        #ASSISTO is your digital assistant for managing tasks, tracking assets, and generating reports. Simplify your operations with this versatile and user-friendly tool.
-                    </p>
-                </div>
-                <a href="#" class="flex-shrink-0 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-center">
-                    More info
-                </a>
-            </div>
-        </div>
+        <?php endforeach; ?>
     </div>
+</div>
 
 <?php
     include '../includes/footer.php';

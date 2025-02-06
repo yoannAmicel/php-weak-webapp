@@ -2,9 +2,9 @@
 
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'test');
-define('DB_USER', 'root');
-define('DB_PASS', 'a');
+define('DB_NAME', 'php_weak_webapp');
+define('DB_USER', 'webapp_user');
+define('DB_PASS', '%67W&q@0Y#uy!Ov=q)TC~jx6');
 
 // Activer les erreurs en mode développement
 ini_set('display_errors', 1);
