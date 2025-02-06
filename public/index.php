@@ -3,9 +3,9 @@
 <?php
 
 // Charger la configuration et les fonctions nécessaires
-require '../config/config.php';
-require '../functions/security.php';
-require '../functions/routes.php'; 
+require_once '../config/config.php';
+require_once '../functions/security.php';
+require_once '../functions/routes.php'; 
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
