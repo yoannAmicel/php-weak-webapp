@@ -14,6 +14,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="../img/Logo.png">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <style>
+        /* Pour que le footer colle au bas de page */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        footer {
+            margin-top: auto; 
+            background-color: #e5e7eb; 
+            padding: 1.5rem 0;
+        }
+
+        /* Pour la partie News */
+        .truncate {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical; 
+            overflow: hidden;
+        }
+
+        .comments-section {
+            display: none;
+            margin-top: 1rem;
+            border-top: 1px solid #ddd;
+            padding-top: 1rem;
+        }
+
+        .add-comment-form {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .center-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+    </style>
+
+    <script>
+        // Bouton permettant l'affichage de toute la description & commentaires
+        function toggleContent(element) {
+            const content = element.previousElementSibling;
+            const commentsSection = element.nextElementSibling;
+            if (content.classList.contains('truncate')) {
+                content.classList.remove('truncate');
+                element.textContent = '<- less info';
+                commentsSection.style.display = 'block';
+            } else {
+                content.classList.add('truncate');
+                element.textContent = 'More info ->';
+                commentsSection.style.display = 'none';
+            }
+        }
+
+        // Bouton permettant d'afficher le formulaire de commentaire
+        function toggleAddCommentForm(button) {
+            const form = button.parentElement.nextElementSibling; 
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                button.textContent = 'Hide Comment Form';
+            } else {
+                form.style.display = 'none';
+                button.textContent = 'Add a Comment';
+            }
+        }
+    </script>
 </head>
 
 <body class="bg-gray-100 text-gray-900">
@@ -56,7 +131,7 @@
         </div>
     </header>
 
-    <div class="h-8"></div>
-    <div class="h-8"></div>
+
+    <div class="mb-16"></div>
 </body>
 </html>
