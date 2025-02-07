@@ -1,2 +1,4 @@
 logs/
 access.log
+public/uploads/*
+!public/uploads/account.png
