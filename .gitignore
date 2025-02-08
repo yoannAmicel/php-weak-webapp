@@ -2,3 +2,5 @@ logs/
 access.log
 public/uploads/*
 !public/uploads/account.png
+public/img/users/*
+!public/img/users/everyone.png

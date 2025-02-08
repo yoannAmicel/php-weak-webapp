@@ -8,7 +8,8 @@ $routes = [
     'login' => 'login.php',
     'register' => 'register.php',
     'legal' => 'legal_notice.php',
-    'privacy' => 'privacy_policy.php'
+    'privacy' => 'privacy_policy.php',
+    'myaccount' => 'myaccount.php'
 ];
 
 function route($name) {
