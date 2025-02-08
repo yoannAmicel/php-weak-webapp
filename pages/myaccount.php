@@ -41,56 +41,13 @@
 
     // Traitement des actions utilisateur
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        try {
-            // Gestion de la suppression de la photo de profil
-            if (isset($_POST['delete_profile_picture'])) {
-                $currentProfilePicture = $user['profile_picture'];
+        if (hasPermission('admin') || hasPermission('user')) {
+            try {
+                // Gestion de la suppression de la photo de profil
+                if (isset($_POST['delete_profile_picture'])) {
+                    $currentProfilePicture = $user['profile_picture'];
 
-                // Supprime l'ancienne photo de profil si elle n'est pas par défaut
-                if (!empty($currentProfilePicture) && $currentProfilePicture !== '/img/users/everyone.png') {
-                    $oldFile = __DIR__ . '/../public' . $currentProfilePicture;
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile); // Supprime le fichier
-                    }
-                }
-
-                // Met à jour la base de données avec l'image par défaut
-                $stmt = $pdo->prepare("UPDATE users SET profile_picture = :profile_picture WHERE id = :id");
-                $stmt->execute([
-                    ':profile_picture' => '/img/users/everyone.png',
-                    ':id' => $userId
-                ]);
-
-                $_SESSION['flash_message'] = 'Photo de profil supprimée avec succès.';
-                header('Location: /?page=myaccount');
-                exit;
-            }
-
-            // Récupération des champs du formulaire
-            $name = htmlspecialchars(trim($_POST['name'] ?? ''));
-            $email = filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL);
-            $newPassword = $_POST['new_password'] ?? '';
-            $confirmPassword = $_POST['confirm_password'] ?? '';
-            $currentProfilePicture = $user['profile_picture'];
-            $profilePicturePath = $currentProfilePicture;
-
-            // Gestion de l'upload de la photo de profil
-            if (!empty($_FILES['profile_picture']['name']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-                $targetDir = __DIR__ . '/../public/img/users/';
-                $fileTmp = $_FILES['profile_picture']['tmp_name'];
-                $fileName = uniqid() . "_" . basename($_FILES['profile_picture']['name']);
-                $targetFile = $targetDir . $fileName;
-
-                // Vérification du type MIME
-                $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                $fileType = mime_content_type($fileTmp);
-
-                if (!in_array($fileType, $allowedTypes)) {
-                    $_SESSION['error_message'] = 'Seuls les fichiers JPG, PNG et GIF sont autorisés.';
-                    header('Location: /?page=myaccount');
-                    exit;
-                } elseif (move_uploaded_file($fileTmp, $targetFile)) {
-                    // Supprimer l'ancienne photo de profil si elle existe et n'est pas par défaut
+                    // Supprime l'ancienne photo de profil si elle n'est pas par défaut
                     if (!empty($currentProfilePicture) && $currentProfilePicture !== '/img/users/everyone.png') {
                         $oldFile = __DIR__ . '/../public' . $currentProfilePicture;
                         if (file_exists($oldFile)) {
@@ -98,49 +55,98 @@
                         }
                     }
 
-                    // Met à jour le chemin de la nouvelle photo de profil
-                    $profilePicturePath = '/img/users/' . $fileName;
-                } else {
-                    $_SESSION['error_message'] = 'Erreur lors de l’upload du fichier.';
+                    // Met à jour la base de données avec l'image par défaut
+                    $stmt = $pdo->prepare("UPDATE users SET profile_picture = :profile_picture WHERE id = :id");
+                    $stmt->execute([
+                        ':profile_picture' => '/img/users/everyone.png',
+                        ':id' => $userId
+                    ]);
+
+                    $_SESSION['flash_message'] = 'Photo de profil supprimée avec succès.';
                     header('Location: /?page=myaccount');
                     exit;
                 }
-            }
 
-            // Mise à jour des informations générales
-            $stmt = $pdo->prepare("UPDATE users SET name = :name, email = :email, profile_picture = :profile_picture WHERE id = :id");
-            $stmt->execute([
-                ':name' => $name,
-                ':email' => $email,
-                ':profile_picture' => $profilePicturePath,
-                ':id' => $userId
-            ]);
+                // Récupération des champs du formulaire
+                $name = htmlspecialchars(trim($_POST['name'] ?? ''));
+                $email = filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL);
+                $newPassword = $_POST['new_password'] ?? '';
+                $confirmPassword = $_POST['confirm_password'] ?? '';
+                $currentProfilePicture = $user['profile_picture'];
+                $profilePicturePath = $currentProfilePicture;
 
-            // Gestion du mot de passe
-            if (!empty($newPassword) && $newPassword === $confirmPassword) {
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
+                // Gestion de l'upload de la photo de profil
+                if (!empty($_FILES['profile_picture']['name']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+                    $targetDir = __DIR__ . '/../public/img/users/';
+                    $fileTmp = $_FILES['profile_picture']['tmp_name'];
+                    $fileName = uniqid() . "_" . basename($_FILES['profile_picture']['name']);
+                    $targetFile = $targetDir . $fileName;
+
+                    // Vérification du type MIME
+                    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    $fileType = mime_content_type($fileTmp);
+
+                    if (!in_array($fileType, $allowedTypes)) {
+                        $_SESSION['error_message'] = 'Seuls les fichiers JPG, PNG et GIF sont autorisés.';
+                        header('Location: /?page=myaccount');
+                        exit;
+                    } elseif (move_uploaded_file($fileTmp, $targetFile)) {
+                        // Supprimer l'ancienne photo de profil si elle existe et n'est pas par défaut
+                        if (!empty($currentProfilePicture) && $currentProfilePicture !== '/img/users/everyone.png') {
+                            $oldFile = __DIR__ . '/../public' . $currentProfilePicture;
+                            if (file_exists($oldFile)) {
+                                unlink($oldFile); // Supprime le fichier
+                            }
+                        }
+
+                        // Met à jour le chemin de la nouvelle photo de profil
+                        $profilePicturePath = '/img/users/' . $fileName;
+                    } else {
+                        $_SESSION['error_message'] = 'Erreur lors de l’upload du fichier.';
+                        header('Location: /?page=myaccount');
+                        exit;
+                    }
+                }
+
+                // Mise à jour des informations générales
+                $stmt = $pdo->prepare("UPDATE users SET name = :name, email = :email, profile_picture = :profile_picture WHERE id = :id");
                 $stmt->execute([
-                    ':password' => $hashedPassword,
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':profile_picture' => $profilePicturePath,
                     ':id' => $userId
                 ]);
-                $_SESSION['flash_message'] = 'Informations et mot de passe mis à jour avec succès.';
-            } elseif (!empty($newPassword) || !empty($confirmPassword)) {
-                $_SESSION['error_message'] = 'Les mots de passe ne correspondent pas.';
-            } else {
-                $_SESSION['flash_message'] = 'Informations mises à jour avec succès.';
+
+                // Gestion du mot de passe
+                if (!empty($newPassword) && $newPassword === $confirmPassword) {
+                    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+                    $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
+                    $stmt->execute([
+                        ':password' => $hashedPassword,
+                        ':id' => $userId
+                    ]);
+                    $_SESSION['flash_message'] = 'Informations et mot de passe mis à jour avec succès.';
+                } elseif (!empty($newPassword) || !empty($confirmPassword)) {
+                    $_SESSION['error_message'] = 'Les mots de passe ne correspondent pas.';
+                } else {
+                    $_SESSION['flash_message'] = 'Informations mises à jour avec succès.';
+                }
+
+                // Redirection pour éviter le renvoi du formulaire
+                header('Location: /?page=myaccount');
+                exit;
+
+            } catch (PDOException $e) {
+                $_SESSION['error_message'] = 'Erreur lors de la mise à jour : ' . $e->getMessage();
+                header('Location: /?page=myaccount');
+                exit;
+            } catch (Exception $e) {
+                $_SESSION['error_message'] = $e->getMessage();
+                header('Location: /?page=myaccount');
+                exit;
             }
-
-            // Redirection pour éviter le renvoi du formulaire
-            header('Location: /?page=myaccount');
-            exit;
-
-        } catch (PDOException $e) {
-            $_SESSION['error_message'] = 'Erreur lors de la mise à jour : ' . $e->getMessage();
-            header('Location: /?page=myaccount');
-            exit;
-        } catch (Exception $e) {
-            $_SESSION['error_message'] = $e->getMessage();
+        } else {
+            $_SESSION['error_message'] = "You're not allowed to interact with this page.";
             header('Location: /?page=myaccount');
             exit;
         }
@@ -167,73 +173,75 @@
         <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data">
-        <!-- Section "General" -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 text-gray-600 border-b border-gray-300 pb-2">General</h3>
+    <?php if (hasPermission('admin') || hasPermission('user')): ?>
+        <form method="POST" enctype="multipart/form-data">
+            <!-- Section "General" -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-gray-600 border-b border-gray-300 pb-2">General</h3>
 
-            <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-600">Name</label>
-                <input id="name" type="text" name="name" value="<?= htmlspecialchars($user['name']); ?>" required
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-600">Email Address</label>
-                <input id="email" type="email" name="email" value="<?= htmlspecialchars($user['email']); ?>" required
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="profile_picture" class="block text-sm font-medium text-gray-600">Profile Picture</label>
-                <!-- Champ pour uploader une nouvelle photo de profil -->
-                <input id="profile_picture" type="file" name="profile_picture"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-
-                <!-- Affichage de la photo actuelle -->
-                <div class="mt-4 flex justify-center">
-                    <img src="<?= htmlspecialchars($user['profile_picture']); ?>" alt="Current Profile Picture"
-                        class="h-60 w-60 rounded-full object-cover shadow-md">
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-600">Name</label>
+                    <input id="name" type="text" name="name" value="<?= htmlspecialchars($user['name']); ?>" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
 
-                <!-- Bouton pour supprimer la photo de profil dans le formulaire principal -->
-                <?php if ($user['profile_picture'] !== '/img/users/everyone.png'): ?>
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-600">Email Address</label>
+                    <input id="email" type="email" name="email" value="<?= htmlspecialchars($user['email']); ?>" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="mb-4">
+                    <label for="profile_picture" class="block text-sm font-medium text-gray-600">Profile Picture</label>
+                    <!-- Champ pour uploader une nouvelle photo de profil -->
+                    <input id="profile_picture" type="file" name="profile_picture"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+
+                    <!-- Affichage de la photo actuelle -->
                     <div class="mt-4 flex justify-center">
-                        <form method="POST">
-                            <button type="submit" name="delete_profile_picture"
-                                class="py-2 px-4 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none">
-                                Remove Profile Picture
-                            </button>
-                        </form>
+                        <img src="<?= htmlspecialchars($user['profile_picture']); ?>" alt="Current Profile Picture"
+                            class="h-60 w-60 rounded-full object-cover shadow-md">
                     </div>
-                <?php endif; ?>
+
+                    <!-- Bouton pour supprimer la photo de profil dans le formulaire principal -->
+                    <?php if ($user['profile_picture'] !== '/img/users/everyone.png'): ?>
+                        <div class="mt-4 flex justify-center">
+                            <form method="POST">
+                                <button type="submit" name="delete_profile_picture"
+                                    class="py-2 px-4 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none">
+                                    Remove Profile Picture
+                                </button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
 
-        <!-- Section "Security" -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 text-gray-600 border-b border-gray-300 pb-2">Security</h3>
+            <!-- Section "Security" -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-gray-600 border-b border-gray-300 pb-2">Security</h3>
 
-            <div class="mb-4">
-                <label for="new_password" class="block text-sm font-medium text-gray-600">New Password</label>
-                <input id="new_password" type="password" name="new_password"
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div class="mb-4">
+                    <label for="new_password" class="block text-sm font-medium text-gray-600">New Password</label>
+                    <input id="new_password" type="password" name="new_password"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirm_password" class="block text-sm font-medium text-gray-600">Confirm New Password</label>
+                    <input id="confirm_password" type="password" name="confirm_password"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label for="confirm_password" class="block text-sm font-medium text-gray-600">Confirm New Password</label>
-                <input id="confirm_password" type="password" name="confirm_password"
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Save Changes
+                </button>
             </div>
-        </div>
-
-        <div>
-            <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Save Changes
-            </button>
-        </div>
-    </form>
+        </form>
+    <?php endif; ?>
 </div>
 
 <?php

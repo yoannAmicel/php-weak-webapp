@@ -2,19 +2,19 @@
 
 <?php
     include '../includes/header.php';
-?>
 
-<?php
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 ?>
 
+
 <head>
     <title>Forgot Password</title>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+
+
     <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg mt-20 mb-12">
         <h2 class="text-2xl font-bold mb-4">Forgot Password</h2>
         <p class="text-sm text-gray-600 mb-4">Enter your email address below, and we will send you a link to reset your password.</p>
@@ -45,4 +45,4 @@
 <?php
     include '../includes/footer.php';
 ?>
-</body>
+

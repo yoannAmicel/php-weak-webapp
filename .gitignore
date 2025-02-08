@@ -4,3 +4,5 @@ public/uploads/*
 !public/uploads/account.png
 public/img/users/*
 !public/img/users/everyone.png
+public/img/news/*
+!public/img/news/default.jpg

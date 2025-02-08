@@ -2,19 +2,20 @@
 
 <?php
     include '../includes/header.php';
-?>
 
-<?php
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 ?>
 
+
 <head>
     <title>Privacy Policy</title>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+
+
+
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg mt-20 mb-12">
         <h1 class="text-3xl font-bold mb-6">Privacy Policy</h1>
         <p class="text-gray-700 leading-relaxed mb-4">
@@ -62,4 +63,4 @@
 <?php
     include '../includes/footer.php';
 ?>
-</body>
+
