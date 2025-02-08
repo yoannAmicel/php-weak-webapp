@@ -34,3 +34,30 @@ session_start([
     'cookie_httponly' => true,
     'cookie_secure' => isset($_SERVER['HTTPS']),
 ]);
+
+function hasPermission($requiredRole) {
+    global $pdo;
+
+    // Si l'utilisateur n'est pas connecté, il est un "guest"
+    if (!isset($_SESSION['user']['id'])) {
+        return $requiredRole === 'guest';
+    }
+
+    // Récupérer le rôle de l'utilisateur connecté
+    $userId = $_SESSION['user']['id'];
+    $stmt = $pdo->prepare("SELECT role FROM users WHERE id = :id");
+    $stmt->execute([':id' => $userId]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        return false; // Utilisateur introuvable
+    }
+
+    $userRole = $user['role'];
+
+    // Définir la hiérarchie des rôles
+    $roleHierarchy = ['user' => 0, 'admin' => 1];
+
+    // Vérifier si l'utilisateur a un rôle suffisant
+    return $roleHierarchy[$userRole] >= $roleHierarchy[$requiredRole];
+}

@@ -7,9 +7,11 @@ $routes = [
     'contact' => 'contact.php',
     'login' => 'login.php',
     'register' => 'register.php',
+    'forgot-password' => 'forgot.php',
     'legal' => 'legal_notice.php',
     'privacy' => 'privacy_policy.php',
-    'myaccount' => 'myaccount.php'
+    'myaccount' => 'myaccount.php',
+    'validation' => 'validation.php'
 ];
 
 function route($name) {

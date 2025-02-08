@@ -1,0 +1,56 @@
+/* Pour que le footer colle au bas de page */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    margin-top: auto; 
+    background-color: #e5e7eb; 
+    padding: 1.5rem 0;
+}
+
+/* Pour la partie News */
+.truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; 
+    overflow: hidden;
+}
+
+.comments-section {
+    display: none;
+    margin-top: 1rem;
+    border-top: 1px solid #ddd;
+    padding-top: 1rem;
+}
+
+.add-comment-form {
+    display: none;
+    margin-top: 1rem;
+}
+
+.center-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+#delete-popup.hidden {
+    display: none;
+}
+
+#delete-popup {
+    z-index: 1000;
+}
+
+.bg-opacity-50 {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+

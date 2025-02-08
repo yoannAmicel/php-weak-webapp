@@ -1,22 +1,31 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <?php
     include '../includes/header.php';
-?>
 
-<head>
-    <title>Register</title>
-</head>
-
-<?php
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 ?>
 
+
+<head>
+    <title>Register</title>
+</head>
+
+
 <body class="bg-gray-100 text-gray-900">
-    <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg mt-20 mb-20">
+    <div class="w-full max-w-2xl mx-auto bg-white p-12 rounded-lg shadow-lg mt-18 mb-18">
         <h2 class="text-2xl font-bold mb-4">Register</h2>
+
+        <?php if (!empty($_SESSION['register_error'])): ?>
+            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4">
+                <?= htmlspecialchars($_SESSION['register_error']); ?>
+                <?php unset($_SESSION['register_error']); ?>
+            </div>
+        <?php endif; ?>
+
         <form method="POST" action="?action=register.submit">
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
@@ -45,7 +54,7 @@
                 <?php endif; ?>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-6">
                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
                 <input id="password_confirmation" type="password" name="password_confirmation" required
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -69,4 +78,4 @@
 <?php
     include '../includes/footer.php';
 ?>
-</body>
+

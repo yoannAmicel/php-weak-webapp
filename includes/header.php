@@ -13,15 +13,30 @@
         die('Erreur : connexion à la base de données non définie.');
     }
 
+    $isAdmin = false;
+
     if (isset($_SESSION['user']['id'])) {
         $userId = $_SESSION['user']['id'];
-        $stmt = $pdo->prepare("SELECT profile_picture FROM users WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT profile_picture, role FROM users WHERE id = :id");
         $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
         $stmt->execute();
         $result = $stmt->fetch();
 
-        if ($result && !empty($result['profile_picture'])) {
-            $profilePicture = htmlspecialchars($result['profile_picture']);
+        if ($result) {
+            $profilePicture = htmlspecialchars($result['profile_picture'] ?? '');
+            $isAdmin = $result['role'] === 'admin'; // Vérifie si le rôle est admin
+        }
+    }
+
+    // Récupérer le nombre de news en attente de validation
+    $pendingCount = 0;
+    if (isset($_SESSION['user']) && hasPermission('admin')) {
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) AS pending_count FROM news WHERE status = 'pending'");
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $pendingCount = $result['pending_count'] ?? 0;
+        } catch (PDOException $e) {
+            $pendingCount = 0; // En cas d'erreur, on affiche 0
         }
     }
 ?>
@@ -31,52 +46,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="../img/Logo.png">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-
-    <style>
-        /* Pour que le footer colle au bas de page */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        footer {
-            margin-top: auto; 
-            background-color: #e5e7eb; 
-            padding: 1.5rem 0;
-        }
-
-        /* Pour la partie News */
-        .truncate {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical; 
-            overflow: hidden;
-        }
-
-        .comments-section {
-            display: none;
-            margin-top: 1rem;
-            border-top: 1px solid #ddd;
-            padding-top: 1rem;
-        }
-
-        .add-comment-form {
-            display: none;
-            margin-top: 1rem;
-        }
-
-        .center-button {
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 
 <body class="bg-gray-100 text-gray-900">
@@ -95,7 +65,20 @@
                     <a href="<?= route('home') ?>" class="hover:text-gray-400">Home</a>
                     <a href="<?= route('software') ?>" class="hover:text-gray-400">Software</a>
                     <a href="<?= route('news') ?>" class="hover:text-gray-400">News</a>
-                    <a href="<?= route('contact') ?>" class="hover:text-gray-400">Contact</a>
+                    <!-- Remplace Contact par Validations si l'utilisateur est admin -->
+                    <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
+    <a href="<?= route('validation') ?>" class="relative hover:text-gray-400">
+        Validations
+        <?php if ($pendingCount > 0): ?>
+            <span class="absolute -top-3 -right-2 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                <?= htmlspecialchars($pendingCount) ?>
+            </span>
+        <?php endif; ?>
+    </a>
+<?php else: ?>
+    <a href="<?= route('contact') ?>" class="hover:text-gray-400">Contact</a>
+<?php endif; ?>
+
                 </nav>
 
                 <?php if (isset($_SESSION['user'])): ?>
@@ -133,5 +116,3 @@
     </header>
 
     <div class="mb-16"></div>
-
-

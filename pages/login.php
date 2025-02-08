@@ -16,7 +16,7 @@
 </head>
 
 
-    <div class="w-full max-w-2xl mx-auto bg-white p-12 rounded-lg shadow-lg mt-32">
+    <div class="w-full max-w-2xl mx-auto bg-white p-12 rounded-lg shadow-lg mt-28">
         <h2 class="text-2xl font-bold mb-4">Login</h2>
 
         <?php if (!empty($_SESSION['status'])): ?>

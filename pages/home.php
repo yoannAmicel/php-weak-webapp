@@ -2,13 +2,12 @@
 
 <?php
     include '../includes/header.php';
-?>
 
-<?php
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 ?>
+
 
 <head>
     <title>Home</title>
