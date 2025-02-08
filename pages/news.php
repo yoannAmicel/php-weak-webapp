@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 
+
+<head>
+    <title>News</title>
+</head>
+
 <?php
     include '../includes/header.php';
     require_once '../config/config.php';
@@ -48,26 +53,38 @@
         }
 
         // En cas d'ajout d'un commentaire
-        if(isset($_POST['add_comment'])) {
-
+        if (isset($_POST['add_comment'])) {
             $news_id = $_POST['news_id'] ?? '';
             $comment = $_POST['comment'] ?? '';
             $profile_picture_path = '/uploads/account.png'; 
-
-            // Gestion du username
-            if (isset($_SESSION['user']['name'])) {
-                $username = $_SESSION['user']['name'];
+            $username = 'Anonymous';
+        
+            // Vérification si l'utilisateur est connecté
+            if (isset($_SESSION['user']['id'])) {
+                $user_id = $_SESSION['user']['id'];
+        
+                // Récupération des données utilisateur depuis la base de données
+                try {
+                    $stmt = $pdo->prepare("SELECT name, profile_picture FROM users WHERE id = ?");
+                    $stmt->execute([$user_id]);
+                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+                    if ($user) {
+                        $username = $user['name'];
+                        $profile_picture_path = $user['profile_picture'];
+                    }
+                } catch (PDOException $e) {
+                    die('Erreur lors de la récupération des données utilisateur : ' . $e->getMessage());
+                }
             } elseif (!empty($_POST['name'])) {
                 $username = $_POST['name'];
-            } else {
-                $username = 'Anonymous';
             }
         
-            // Dossier d'uploads
+            // Dossier d'uploads pour les visiteurs
             $target_dir = __DIR__ . "/../public/uploads/";
         
-            // Gestion de l'upload du fichier
-            if (!empty($_FILES['profile_picture']['name']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+            // Gestion de l'upload de la photo de profil pour les visiteurs
+            if (!isset($_SESSION['user']) && !empty($_FILES['profile_picture']['name']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
                 $file_tmp = $_FILES['profile_picture']['tmp_name'];
                 $file_name = uniqid() . "_" . basename($_FILES['profile_picture']['name']);
                 $target_file = $target_dir . $file_name;
@@ -87,7 +104,7 @@
                     header('Location: /?page=news');
                     exit;
                 }
-            } 
+            }
         
             // Insertion en base de données avec le chemin de l'image
             try {
@@ -100,10 +117,12 @@
             } catch (PDOException $e) {
                 die('Erreur lors de l’ajout du commentaire : ' . $e->getMessage());
             }
+        }
+        
 
 
             // En cas de suppression d'un commentaire
-        } else if (isset($_POST['delete_comment']) && isset($_POST['comment_id'])) {
+         else if (isset($_POST['delete_comment']) && isset($_POST['comment_id'])) {
             $comment_id = intval($_POST['comment_id']); // Sécuriser l'ID du commentaire
         
             try {
@@ -305,14 +324,23 @@
                     <div class="add-comment-form bg-gray-100 p-4 rounded-lg">
                         <form method="POST" enctype="multipart/form-data">
                             <input type="hidden" name="news_id" value="<?= htmlspecialchars($news['id']) ?>">
-                            <div class="mb-4">
-                                <label for="profile_picture_<?= htmlspecialchars($news['id']) ?>" class="block text-gray-700 font-bold mb-1">Upload Profile Picture:</label>
-                                <input type="file" id="profile_picture_<?= htmlspecialchars($news['id']) ?>" name="profile_picture" class="border rounded w-full py-2 px-3">
-                            </div>
-                            <div class="mb-4">
-                                <label for="name_<?= htmlspecialchars($news['id']) ?>" class="block text-gray-700 font-bold mb-1">Name:</label>
-                                <input type="text" id="name_<?= htmlspecialchars($news['id']) ?>" name="name" class="border rounded w-full py-2 px-3" value="<?= htmlspecialchars($_SESSION['user']['name'] ?? '') ?>">
-                            </div>
+                            <!-- Champ photo de profil -->
+                            <?php if (!isset($_SESSION['user'])): ?>
+                                <div class="mb-4">
+                                    <label for="profile_picture_<?= htmlspecialchars($news['id']) ?>" class="block text-gray-700 font-bold mb-1">Upload Profile Picture:</label>
+                                    <input type="file" id="profile_picture_<?= htmlspecialchars($news['id']) ?>" name="profile_picture" class="border rounded w-full py-2 px-3">
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Champ nom -->
+                            <?php if (!isset($_SESSION['user'])): ?>
+                                <div class="mb-4">
+                                    <label for="name_<?= htmlspecialchars($news['id']) ?>" class="block text-gray-700 font-bold mb-1">Name:</label>
+                                    <input type="text" id="name_<?= htmlspecialchars($news['id']) ?>" name="name" class="border rounded w-full py-2 px-3">
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Champ commentaire -->
                             <div class="mb-4">
                                 <label for="comment_<?= htmlspecialchars($news['id']) ?>" class="block text-gray-700 font-bold mb-1">Comment:</label>
                                 <textarea id="comment_<?= htmlspecialchars($news['id']) ?>" name="comment" class="border rounded w-full py-2 px-3" required></textarea>
@@ -329,3 +357,32 @@
 <?php
     include '../includes/footer.php';
 ?>
+
+<script>
+        // Bouton permettant l'affichage de toute la description & commentaires
+        function toggleContent(element) {
+            const content = element.previousElementSibling;
+            const commentsSection = element.nextElementSibling;
+            if (content.classList.contains('truncate')) {
+                content.classList.remove('truncate');
+                element.textContent = '<- less info';
+                commentsSection.style.display = 'block';
+            } else {
+                content.classList.add('truncate');
+                element.textContent = 'More info ->';
+                commentsSection.style.display = 'none';
+            }
+        }
+
+        // Bouton permettant d'afficher le formulaire de commentaire
+        function toggleAddCommentForm(button) {
+            const form = button.parentElement.nextElementSibling; 
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                button.textContent = 'Hide Comment Form';
+            } else {
+                form.style.display = 'none';
+                button.textContent = 'Add a Comment';
+            }
+        }
+    </script>

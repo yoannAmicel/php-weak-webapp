@@ -1,11 +1,28 @@
 <!DOCTYPE html>
 <html lang="fr">
 
-<?php include_once '../functions/routes.php'; ?>
+<?php 
+    include_once '../functions/routes.php'; 
+    global $pdo;
 
-<?php
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+    }
+
+    if (!isset($pdo)) {
+        die('Erreur : connexion à la base de données non définie.');
+    }
+
+    if (isset($_SESSION['user']['id'])) {
+        $userId = $_SESSION['user']['id'];
+        $stmt = $pdo->prepare("SELECT profile_picture FROM users WHERE id = :id");
+        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        if ($result && !empty($result['profile_picture'])) {
+            $profilePicture = htmlspecialchars($result['profile_picture']);
+        }
     }
 ?>
 
@@ -60,35 +77,6 @@
             margin-top: 1rem;
         }
     </style>
-
-    <script>
-        // Bouton permettant l'affichage de toute la description & commentaires
-        function toggleContent(element) {
-            const content = element.previousElementSibling;
-            const commentsSection = element.nextElementSibling;
-            if (content.classList.contains('truncate')) {
-                content.classList.remove('truncate');
-                element.textContent = '<- less info';
-                commentsSection.style.display = 'block';
-            } else {
-                content.classList.add('truncate');
-                element.textContent = 'More info ->';
-                commentsSection.style.display = 'none';
-            }
-        }
-
-        // Bouton permettant d'afficher le formulaire de commentaire
-        function toggleAddCommentForm(button) {
-            const form = button.parentElement.nextElementSibling; 
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-                button.textContent = 'Hide Comment Form';
-            } else {
-                form.style.display = 'none';
-                button.textContent = 'Add a Comment';
-            }
-        }
-    </script>
 </head>
 
 <body class="bg-gray-100 text-gray-900">
@@ -101,7 +89,7 @@
                 <span>Avenix</span>
             </a>
 
-            <!-- Navigation et bouton de connexion/déconnexion -->
+            <!-- Navigation et bouton utilisateur -->
             <div class="flex items-center space-x-8">
                 <nav class="flex space-x-8">
                     <a href="<?= route('home') ?>" class="hover:text-gray-400">Home</a>
@@ -111,27 +99,39 @@
                 </nav>
 
                 <?php if (isset($_SESSION['user'])): ?>
-                    <!-- Formulaire pour déconnexion -->
-                    <form method="POST" action="/?action=logout" style="display: inline;">
-                        <button type="submit" 
-                                class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
-                            Logout
+                    <!-- Bouton utilisateur -->
+                    <div class="relative group">
+                        <!-- Bouton utilisateur -->
+                        <button class="flex items-center focus:outline-none">
+                            <img src="<?= $profilePicture; ?>" alt="Profile Picture" 
+                                class="h-10 w-10 rounded-full">
                         </button>
-                    </form>
+
+                        <!-- Sous-menu -->
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 hidden group-hover:block group-focus-within:block">
+                            <a href="<?= route('myaccount') ?>" 
+                            class="block px-4 py-2 text-gray-800 hover:bg-gray-100 hover:text-gray-900">
+                                My account
+                            </a>
+                            <form method="POST" action="/?action=logout">
+                                <button type="submit"
+                                        class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 hover:text-red-700 font-semibold">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <!-- Bouton de connexion -->
                     <a href="<?= route('login') ?>" 
-                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                       class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
                         Connexion
                     </a>
                 <?php endif; ?>
-
-
             </div>
         </div>
     </header>
 
-
     <div class="mb-16"></div>
-</body>
-</html>
+
+

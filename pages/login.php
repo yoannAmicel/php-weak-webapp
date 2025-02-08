@@ -15,10 +15,9 @@
     <title>Login</title>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
-    <div class="max-w-md mx-auto bg-white p-12 rounded-lg shadow-lg mt-20 mb-20">
-        <h2 class="text-2xl font-bold mb-4">Login</h2>
 
+    <div class="w-full max-w-2xl mx-auto bg-white p-12 rounded-lg shadow-lg mt-32">
+        <h2 class="text-2xl font-bold mb-4">Login</h2>
 
         <?php if (!empty($_SESSION['status'])): ?>
             <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
@@ -94,6 +93,6 @@
 <?php
     include '../includes/footer.php';
 ?>
-</body>
+
 
 </html>
