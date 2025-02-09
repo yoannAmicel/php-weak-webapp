@@ -15,6 +15,15 @@
 
 <head>
     <title>Contact</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=<?php print(getVaultSecret("apps/data/avenix/captcha", "public_key"))?>"></script>
+    <script>
+        grecaptcha.ready(function() {
+            grecaptcha.execute('<?php print(getVaultSecret("apps/data/avenix/captcha", "public_key"))?>', { action: 'contact_form' }).then(function(token) {
+                // Insérer le jeton reCAPTCHA dans un champ caché
+                document.getElementById('recaptcha-token').value = token;
+            });
+        });
+    </script>
 </head>
 
 
@@ -29,6 +38,15 @@
             <?php unset($_SESSION['flash_message']); ?>
         <?php endif; ?>
 
+        <!-- Error Message -->
+        <?php if (!empty($_SESSION['error_message'])): ?>
+            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4">
+                <?= htmlspecialchars($_SESSION['error_message']) ?>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
+
+
         <!-- Contact Information -->
         <div class="text-center mb-8">
             <p class="text-lg font-bold text-gray-800">Avenix</p>
@@ -36,6 +54,8 @@
             <p>+33 (0)6 98 08 28 60</p>
             <a href="mailto:contact@avenix.com" class="text-indigo-600 hover:text-indigo-800">contact@avenix.com</a>
         </div>
+
+
 
         <?php
             // Générer un token CSRF si nécessaire
@@ -48,6 +68,7 @@
         <div class="bg-white shadow-md rounded-lg p-6 max-w-lg mx-auto">
             <form action="?action=contact.submit" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                <input type="hidden" name="g-recaptcha-response" id="recaptcha-token">
                 <div>
                     <label for="name" class="block text-sm font-bold text-gray-700">Name*</label>
                     <input type="text" id="name" name="name" value="<?= $name ?>" required class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -61,7 +82,7 @@
                     <textarea id="message" name="message" rows="4" required class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                 </div>
                 <div>
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700">Submit</button>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700">Send</button>
                 </div>
             </form>
         </div>

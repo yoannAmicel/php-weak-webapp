@@ -52,6 +52,43 @@
         exit;
     }
 
+    // Pagination logic
+    $itemsPerPage = 5; // Nombre de news par page
+    $pageNumber = isset($_GET['page_number']) ? max(1, intval($_GET['page_number'])) : 1;
+    $offset = ($pageNumber - 1) * $itemsPerPage;
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT n.*, COUNT(nc.id) AS comments_count
+            FROM news n
+            LEFT JOIN news_comment nc ON n.id = nc.news_id
+            WHERE n.status = 'approved'
+            GROUP BY n.id
+            ORDER BY n.published_date DESC
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $newsItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Récupérer le nombre total de news approuvées pour la pagination
+        $countStmt = $pdo->query("
+            SELECT COUNT(*) 
+            FROM news 
+            WHERE status = 'approved'
+        ");
+        $totalNews = $countStmt->fetchColumn();
+        $totalPages = ceil($totalNews / $itemsPerPage);
+    } catch (PDOException $e) {
+        $_SESSION['error_message'] = 'Error fetching approved news.';
+        $newsItems = [];
+        $totalPages = 1;
+    }
+
+
+
+
     // Si une requête de type POST est envoyée
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // On ne peut traiter les fichiers plus lourds que la configuration le permet
@@ -475,6 +512,28 @@
                 </div>
             <?php endforeach; ?>
         </div>
+        <!-- Pagination -->
+<div class="mt-4 flex justify-center space-x-2">
+    <?php if ($pageNumber > 1): ?>
+        <a href="?page=news&page_number=<?= $pageNumber - 1 ?>" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Previous
+        </a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?page=news&page_number=<?= $i ?>" 
+           class="px-4 py-2 rounded <?= $i === $pageNumber ? 'bg-blue-700 text-white' : 'bg-gray-200 text-blue-500 hover:bg-gray-300' ?>">
+            <?= $i ?>
+        </a>
+    <?php endfor; ?>
+
+    <?php if ($pageNumber < $totalPages): ?>
+        <a href="?page=news&page_number=<?= $pageNumber + 1 ?>" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Next
+        </a>
+    <?php endif; ?>
+</div>
+
     </div>
 
 <!-- Popup -->

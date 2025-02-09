@@ -67,18 +67,17 @@
                     <a href="<?= route('news') ?>" class="hover:text-gray-400">News</a>
                     <!-- Remplace Contact par Validations si l'utilisateur est admin -->
                     <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
-    <a href="<?= route('validation') ?>" class="relative hover:text-gray-400">
-        Validations
-        <?php if ($pendingCount > 0): ?>
-            <span class="absolute -top-3 -right-2 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                <?= htmlspecialchars($pendingCount) ?>
-            </span>
-        <?php endif; ?>
-    </a>
-<?php else: ?>
-    <a href="<?= route('contact') ?>" class="hover:text-gray-400">Contact</a>
-<?php endif; ?>
-
+                        <a href="<?= route('validation') ?>" class="relative hover:text-gray-400">
+                            Validations
+                            <?php if ($pendingCount > 0): ?>
+                                <span class="absolute -top-3 -right-2 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                                    <?= htmlspecialchars($pendingCount) ?>
+                                </span>
+                            <?php endif; ?>
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= route('contact') ?>" class="hover:text-gray-400">Contact</a>
+                    <?php endif; ?>
                 </nav>
 
                 <?php if (isset($_SESSION['user'])): ?>
@@ -96,6 +95,12 @@
                             class="block px-4 py-2 text-gray-800 hover:bg-gray-100 hover:text-gray-900">
                                 My account
                             </a>
+                            <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
+                                <a href="<?= route('users') ?>" 
+                                class="block px-4 py-2 text-gray-800 hover:bg-gray-100 hover:text-gray-900">
+                                    User Management
+                                </a>
+                            <?php endif; ?>
                             <form method="POST" action="/?action=logout">
                                 <button type="submit"
                                         class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 hover:text-red-700 font-semibold">
@@ -107,12 +112,13 @@
                 <?php else: ?>
                     <!-- Bouton de connexion -->
                     <a href="<?= route('login') ?>" 
-                       class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
                         Connexion
                     </a>
                 <?php endif; ?>
             </div>
         </div>
     </header>
+
 
     <div class="mb-16"></div>
