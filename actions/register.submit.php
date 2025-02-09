@@ -1,50 +1,78 @@
 <?php
-    require_once '../config/config.php';
-    require_once '../functions/security.php';
 
+    // Inclusion des fichiers de configuration et de sécurité
+    require_once '../config/config.php'; // Connexion à la base de données
+    require_once '../functions/security.php'; // Fonctions de sécurité supplémentaires
+
+    // Vérification que la requête est bien une requête POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        http_response_code(405);
-        die('Method not allowed');
+        http_response_code(405); 
+        $_SESSION['error_message'] = 'Method not allowed'; 
+        header('Location: /?page=login'); 
+        exit; 
     }
 
-    // Récupération des données
-    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
-    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-    $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
-    $password_confirmation = filter_input(INPUT_POST, 'password_confirmation', FILTER_SANITIZE_STRING);
+    // Récupération et validation des données du formulaire
+    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING); // Nettoie le nom
+    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL); // Vérifie et nettoie l'email
+    $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING); // Nettoie le mot de passe
+    $password_confirmation = filter_input(INPUT_POST, 'password_confirmation', FILTER_SANITIZE_STRING); // Vérifie la confirmation du mot de passe
 
+    // Vérification que tous les champs sont remplis
     if (!$name || !$email || !$password || !$password_confirmation) {
-        $_SESSION['error'] = 'Please fill in all fields.';
-        header('Location: /?page=register');
-        exit;
+        $_SESSION['error_message'] = 'Please fill in all fields.'; 
+        header('Location: /?page=register'); 
+        exit; 
     }
 
+    // Vérification que les deux mots de passe correspondent
     if ($password !== $password_confirmation) {
-        $_SESSION['error'] = 'Passwords do not match.';
-        header('Location: /?page=register');
+        $_SESSION['error_message'] = 'Passwords do not match.'; 
+        header('Location: /?page=register'); 
         exit;
     }
 
-    // Vérifier si l'email existe déjà
+    // Politique de mot de passe : Vérification de la complexité
+    $passwordPolicy = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{12,}$/';
+    if (!preg_match($passwordPolicy, $password)) {
+        $_SESSION['error_message'] = 'Password must contain, at least :
+                12 characters
+                - 1 uppercase letter
+                - 1 lowercase letter
+                - 1 number
+                - 1 special character';
+        header('Location: /?page=register'); // Redirection
+        exit;
+    }
+
+    // Vérification si l'email existe déjà en base de données
     try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-        $stmt->execute(['email' => $email]);
-        if ($stmt->fetch()) {
-            $_SESSION['error'] = 'Email already exists.';
-            header('Location: /?page=register');
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email"); 
+        $stmt->execute(['email' => $email]); 
+        if ($stmt->fetch()) { 
+            // Si un résultat est trouvé, l'email est déjà utilisé
+            $_SESSION['error_message'] = 'Email already exists.'; 
+            header('Location: /?page=register'); 
             exit;
         }
 
-        // Ajouter l'utilisateur
+        // Hachage du mot de passe avant l'insertion en base de données
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Ajout du nouvel utilisateur dans la base de données
         $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
         $stmt->execute(['name' => $name, 'email' => $email, 'password' => $hashedPassword]);
 
-        $_SESSION['register_success'] = 'Account created successfully. You can now log in.';
+        // Message de succès et redirection vers la page de connexion
+        $_SESSION['success_message'] = 'Account created successfully. You can now log in.';
         header('Location: /?page=login');
         exit;
 
     } catch (Exception $e) {
-        http_response_code(500);
-        die('Server error: ' . $e->getMessage());
+        // Gestion des erreurs internes du serveur
+        http_response_code(500); 
+        $_SESSION['error_message'] = 'Server error.';
+        header('Location: /?page=register');
+        exit;
     }
+

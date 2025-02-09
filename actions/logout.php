@@ -1,16 +1,18 @@
 <?php
-// Charger la configuration
-require_once '../config/config.php';
 
-// Démarrer ou reprendre la session
-session_start();
+    // Charger la configuration
+    require_once '../config/config.php';
 
-// Supprimer toutes les données de la session
-$_SESSION = [];
+    // Démarrer ou reprendre la session
+    session_start();
 
-// Détruire la session
-session_destroy();
+    // Supprimer toutes les données de la session
+    $_SESSION = [];
 
-// Rediriger l'utilisateur vers la page de connexion
-header('Location: /?page=login');
-exit;
+    // Détruire la session
+    session_destroy();
+
+    // Rediriger l'utilisateur vers la page de connexion
+    $_SESSION['success_message'] = "You're disconnected.";
+    header('Location: /?page=login');
+    exit;

@@ -21,5 +21,5 @@ function route($name) {
     if (isset($routes[$name])) {
         return '/index.php?page=' . $name; // Génère une URL basée sur le paramètre "page"
     }
-    return '/index.php?page=404'; // Redirige vers une page d'erreur si inexistante
+    return '/index.php?page=404'; 
 }
