@@ -2,10 +2,6 @@
 
 <?php
     include '../includes/header.php';
-
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
 ?>
 
 
@@ -60,6 +56,7 @@
         </p>
     </div>
 
+    
 <?php
     include '../includes/footer.php';
 ?>
