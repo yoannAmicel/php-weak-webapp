@@ -13,7 +13,7 @@
 
     // Vérifie si l'utilisateur est admin
     if (!isset($_SESSION['user']) || !hasPermission('admin')) {
-        header('Location: /?page=login');
+        header('Location: /?page=home');
         exit;
     }
 
@@ -69,14 +69,10 @@
 
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="../img/Logo.png">
-    <link rel="stylesheet" href="/css/main.css">
     <title>News Validation</title>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+
     <div class="container mx-auto px-4 py-8 max-w-5xl">
         <h1 class="text-3xl font-bold text-center mb-8">News Validation</h1>
 
@@ -124,6 +120,7 @@
             <?php endif; ?>
         </div>
     </div>
-</body>
 
-</html>
+<?php
+    include '../includes/footer.php';
+?>

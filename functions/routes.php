@@ -11,7 +11,9 @@ $routes = [
     'legal' => 'legal_notice.php',
     'privacy' => 'privacy_policy.php',
     'myaccount' => 'myaccount.php',
-    'validation' => 'validation.php'
+    'validation' => 'validation.php',
+    'users' => 'users.php',
+    'reset' => 'reset.php'
 ];
 
 function route($name) {

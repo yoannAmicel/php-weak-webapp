@@ -2,9 +2,9 @@
 
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'php_weak_webapp');
-define('DB_USER', 'webapp_user');
-define('DB_PASS', '%67W&q@0Y#uy!Ov=q)TC~jx6');
+define('DB_NAME', getVaultSecret("apps/data/avenix/database", "db_database"));
+define('DB_USER', getVaultSecret("apps/data/avenix/database", "db_username"));
+define('DB_PASS', getVaultSecret("apps/data/avenix/database", "db_password"));
 
 // Activer les erreurs en mode développement
 ini_set('display_errors', 1);
@@ -34,6 +34,36 @@ session_start([
     'cookie_httponly' => true,
     'cookie_secure' => isset($_SERVER['HTTPS']),
 ]);
+
+
+function getVaultSecret($path, $key) {
+    $vaultAddr = "https://127.0.0.1:8200"; 
+    $vaultToken = "hvs.KrhhLvt05tqLHtSwlXUivx37"; 
+
+    $url = "{$vaultAddr}/v1/{$path}";
+
+    $ch = curl_init($url);
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "X-Vault-Token: {$vaultToken}"    
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($httpCode !== 200) {
+        die("Erreur : Impossible de récupérer les secrets (HTTP Code: $httpCode)");
+    }
+
+    curl_close($ch);
+
+    $data = json_decode($response, true);
+    return $data['data']['data'][$key] ?? null;
+}
+
 
 function hasPermission($requiredRole) {
     global $pdo;
