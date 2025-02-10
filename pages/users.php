@@ -20,7 +20,7 @@
         <!----------------------------------------------------------------------------------->
         <!-- Affichage des messages de succès et d'erreur ----------------------------------->
         <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded">
+            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded mb-4">
                 <?= htmlspecialchars($_SESSION['success_message']) ?>
             </div>
             <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
@@ -103,7 +103,8 @@
                             <td class="border border-gray-200 px-4 py-2">
                                 <div class="flex items-center space-x-4">
                                     <!-- Formulaire pour changer le rôle d'un utilisateur -->
-                                    <form method="POST" action="">
+                                    <form method="POST" action="?action=users.submit">
+                                        <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['id']) ?>">
                                         <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                                             <select name="role" class="border rounded px-2 py-1">
                                                 <option value="user" <?= $user['role'] === 'user' ? 'selected' : '' ?>>User</option>
@@ -116,7 +117,7 @@
                                     </form>
                                     <!-- Boutons de blocage / déblocage -->
                                     <?php if ($user['role'] !== 'admin'): ?>
-                                        <form method="POST" action="">
+                                        <form method="POST" action="?action=users.submit">
                                             <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['id']) ?>">
                                             <?php if ($user['is_blocked']): ?>
                                                 <button type="submit" name="unblock" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">

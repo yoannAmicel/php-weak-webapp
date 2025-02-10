@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
 <?php
-    include '../includes/header.php';
     include_once '../includes/validation_helper.php';
+    require '../includes/header.php';
 ?>
 
 
@@ -20,7 +20,7 @@
         <!----------------------------------------------------------------------------------->
         <!-- Affichage des messages de succès et d'erreur ----------------------------------->
         <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded">
+            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded mb-4">
                 <?= htmlspecialchars($_SESSION['success_message']) ?>
             </div>
             <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
@@ -55,7 +55,7 @@
                             <p class="text-gray-700 mb-4"><?= htmlspecialchars($news['content'] ?? 'No Content Available') ?></p>
 
                             <!-- Formulaire d'approbation/rejet de la news -->
-                            <form method="POST" class="flex space-x-4">
+                            <form method="POST" action="?action=validation.submit" class="flex space-x-4">
                                 <input type="hidden" name="news_id" value="<?= htmlspecialchars($news['id']) ?>">
                                 <!-- Bouton pour approuver la news -->
                                 <button type="submit" name="approve" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">

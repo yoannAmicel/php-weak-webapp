@@ -29,27 +29,6 @@
         <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">CONTACT</h1>
 
 
-
-        <!----------------------------------------------------------------------------------->
-        <!-- Affichage des messages de succès et d'erreur ----------------------------------->
-        <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-            </div>
-            <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
-        <?php endif; ?>
-
-        <?php if (!empty($_SESSION['error_message'])): ?>
-            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-            </div>
-            <?php unset($_SESSION['error_message']); // Suppression du message après affichage ?>
-        <?php endif; ?>
-        <!----------------------------------------------------------------------------------->
-
-
-
-
         <!-- Informations de contact de l'entreprise -->
         <div class="text-center mb-8">
             <p class="text-lg font-bold text-gray-800">Avenix</p>
@@ -66,6 +45,29 @@
 
                 <!-- Google reCAPTCHA : Champ caché pour stocker la réponse -->
                 <input type="hidden" name="g-recaptcha-response" id="recaptcha-token">
+
+
+
+
+                <!----------------------------------------------------------------------------------->
+                <!-- Affichage des messages de succès et d'erreur ----------------------------------->
+                <?php if (!empty($_SESSION['success_message'])): ?>
+                    <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded mb-4 w-full">
+                        <?= htmlspecialchars($_SESSION['success_message']) ?>
+                    </div>
+                    <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
+                <?php endif; ?>
+
+                <?php if (!empty($_SESSION['error_message'])): ?>
+                    <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4 w-full">
+                        <?= htmlspecialchars($_SESSION['error_message']) ?>
+                    </div>
+                    <?php unset($_SESSION['error_message']); // Suppression du message après affichage ?>
+                <?php endif; ?>
+                <!----------------------------------------------------------------------------------->
+
+
+
 
                 <div>
                     <label for="name" class="block text-sm font-bold text-gray-700">Name*</label>

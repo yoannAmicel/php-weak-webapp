@@ -21,14 +21,14 @@
         <!----------------------------------------------------------------------------------->
         <!-- Affichage des messages de succès et d'erreur ----------------------------------->
         <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded">
+            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded mb-4 w-2/3 mx-auto">
                 <?= htmlspecialchars($_SESSION['success_message']) ?>
             </div>
             <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
         <?php endif; ?>
 
         <?php if (!empty($_SESSION['error_message'])): ?>
-            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4">
+            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4 w-2/3 mx-auto">
                 <?= htmlspecialchars($_SESSION['error_message']) ?>
             </div>
             <?php unset($_SESSION['error_message']); // Suppression du message après affichage ?>
@@ -39,12 +39,12 @@
 
 
         <!-- Formulaire d'ajout d'un software, visible UNIQUEMENT par les administrateurs -->
-        <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
+        <?php if (isset($_SESSION['user']) && hasPermission('admin', $pdo)): ?>
             <div class="bg-white p-6 rounded-lg justify-center shadow-md mb-8 w-2/3 mx-auto flex flex-col">
                 <h2 class="text-2xl font-bold mb-4">Add New Software</h2>
                 
                 <!-- Formulaire de soumission -->
-                <form method="POST" action="" class="grid gap-4" onsubmit="forceUpperCase(event)">
+                <form method="POST" action="?action=software.submit" class="grid gap-4" onsubmit="forceUpperCase(event)">
                     <input type="hidden" name="action" value="add">
                     
                     <!-- Champ pour le nom du software (converti automatiquement en majuscules) -->
@@ -115,7 +115,7 @@
                             More info
                         </a>
 
-                        <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
+                        <?php if (isset($_SESSION['user']) && hasPermission('admin', $pdo)): ?>
                             <button type="button" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
                                     onclick="openPopup(<?= htmlspecialchars($software['id']) ?>, '<?= htmlspecialchars($software['name']) ?>')">
                                 Delete
@@ -139,7 +139,7 @@
             <p id="popup-message" class="mb-6 text-gray-700">Are you sure you want to delete this software?</p>
             
             <!-- Formulaire de suppression -->
-            <form id="delete-form" method="POST" action="">
+            <form id="delete-form" method="POST" action="?action=software.submit">
                 <!-- ID du software à supprimer (caché) -->
                 <input type="hidden" id="delete-software-id" name="id" value="">
                 <input type="hidden" name="action" value="delete">

@@ -11,32 +11,32 @@
 
 
     <div class="container mx-auto px-4 py-8">
-
-
-        <!----------------------------------------------------------------------------------->
-        <!-- Affichage des messages de succès et d'erreur ----------------------------------->
-        <?php if (!empty($_SESSION['success_message'])): ?>
-            <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-            </div>
-            <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
-        <?php endif; ?>
-
-        <?php if (!empty($_SESSION['error_message'])): ?>
-            <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-            </div>
-            <?php unset($_SESSION['error_message']); // Suppression du message après affichage ?>
-        <?php endif; ?>
-        <!----------------------------------------------------------------------------------->
-
-
-
         <!-- Conteneur principal du formulaire de réinitialisation de mot de passe -->
         <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg mt-20 mb-12">
-
+            
             <!-- Titre principal de la page -->
             <h2 class="text-2xl font-bold mb-4">Forgot Password</h2>
+
+
+            <!----------------------------------------------------------------------------------->
+            <!-- Affichage des messages de succès et d'erreur ----------------------------------->
+            <?php if (!empty($_SESSION['success_message'])): ?>
+                <div class="bg-green-100 border border-green-500 text-green-700 px-4 py-2 rounded mb-4 w-full">
+                    <?= htmlspecialchars($_SESSION['success_message']) ?>
+                </div>
+                <?php unset($_SESSION['success_message']); // Suppression du message après affichage ?>
+            <?php endif; ?>
+
+            <?php if (!empty($_SESSION['error_message'])): ?>
+                <div class="bg-red-100 border border-red-500 text-red-700 px-4 py-2 rounded mb-4 w-full">
+                    <?= htmlspecialchars($_SESSION['error_message']) ?>
+                </div>
+                <?php unset($_SESSION['error_message']); // Suppression du message après affichage ?>
+            <?php endif; ?>
+            <!----------------------------------------------------------------------------------->
+
+
+
 
             <!-- Texte d'explication pour guider l'utilisateur sur la procédure -->
             <p class="text-sm text-gray-600 mb-4">

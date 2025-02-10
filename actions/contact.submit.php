@@ -43,9 +43,6 @@
     // Récupération de l'adresse IP de l'utilisateur
     $ipAddress = $_SERVER['REMOTE_ADDR'];
 
-    // Connexion à la base de données
-    global $pdo;
-
     try {
         // Vérifie le nombre de tentatives d'envoi de formulaire dans les 30 dernières minutes
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM contact_attempts WHERE ip_address = ? AND created_at >= NOW() - INTERVAL 30 MINUTE");
