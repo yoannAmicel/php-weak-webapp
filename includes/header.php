@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <?php 
-    include_once '../includes/header_helper.php'; 
+    require_once '../includes/header_helper.php'; 
 ?>
 
 <head>
@@ -33,7 +33,7 @@
                     <a href="<?= route('news') ?>" class="hover:text-gray-400">News</a>
 
                     <!-- Si l'utilisateur est admin, affiche "Validations" à la place de "Contact" -->
-                    <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
+                    <?php if (isset($_SESSION['user']) && hasPermission('admin', $pdo)): ?>
                         <a href="<?= route('validation') ?>" class="relative hover:text-gray-400">
                             Validations
                             <!-- Affichage du compteur de news en attente de validation (si supérieur à 0) -->
@@ -65,7 +65,7 @@
                             </a>
                             
                             <!-- Affichage de la gestion des utilisateurs UNIQUEMENT pour les administrateurs -->
-                            <?php if (isset($_SESSION['user']) && hasPermission('admin')): ?>
+                            <?php if (isset($_SESSION['user']) && hasPermission('admin', $pdo)): ?>
                                 <a href="<?= route('users') ?>" 
                                 class="block px-4 py-2 text-gray-800 hover:bg-gray-100 hover:text-gray-900">
                                     User Management

@@ -65,8 +65,7 @@ function getVaultSecret($path, $key) {
 }
 
 
-function hasPermission($requiredRole) {
-    global $pdo;
+function hasPermission($requiredRole, $pdo) {
 
     // Si l'utilisateur n'est pas connecté, il est un "guest"
     if (!isset($_SESSION['user']['id'])) {

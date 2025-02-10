@@ -1,7 +1,7 @@
 <?php
-
+    require_once '../config/config.php'; 
     // Inclusion des routes et éventuelles fonctions globales
-    include_once '../functions/routes.php'; 
+    require_once '../functions/routes.php'; 
 
     // Déclaration explicite de $pdo en global pour accéder à la connexion à la base de données
     global $pdo;
@@ -56,7 +56,8 @@
     $pendingCount = 0; // Valeur par défaut si aucune news en attente
 
     // Vérifie si l'utilisateur est connecté et possède les permissions administrateur
-    if (isset($_SESSION['user']) && hasPermission('admin')) {
+    if (isset($_SESSION['user']) && hasPermission('admin', $pdo)) {
+        
         try {
             // Compter le nombre de news avec le statut "pending"
             $stmt = $pdo->query("SELECT COUNT(*) AS pending_count FROM news WHERE status = 'pending'");
