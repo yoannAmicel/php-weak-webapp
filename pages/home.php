@@ -19,7 +19,7 @@
 
         <!-- Section images -->
         <div class="py-12 bg-gray-100">
-            <div class="container mx-auto text-center">
+            <div class="container mx-auto text-center w-1/2">
                 <div class="grid grid-cols-3 gap-4">
                     <img src="../img/compressed/mountain-bike.jpg" alt="Image 1" class="mx-auto">
                     <img src="../img/compressed/american.jpg" alt="Image 2" class="mx-auto">
