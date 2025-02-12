@@ -5,8 +5,10 @@
     // Inclusion du fichier de sécurité 
     require_once '../functions/security.php';
 
-    // Démarrage de la session utilisateur
-    session_start();
+    // Démarre une session si aucune n'est active
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
     // Vérification que la requête est bien une requête POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -17,8 +19,8 @@
     }
 
     // Récupération et validation des données du formulaire
-    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL); // Vérifie et filtre l'email
-    $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING); // Nettoie la valeur du mot de passe
+    $email = htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8'); // Vérifie et filtre l'email
+    $password = htmlspecialchars($_POST['password'], ENT_QUOTES, 'UTF-8'); // Nettoie la valeur du mot de passe
 
     // Vérification que tous les champs sont remplis
     if (!$email || !$password) {

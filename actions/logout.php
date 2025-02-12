@@ -3,8 +3,10 @@
     // Charger la configuration
     require_once '../config/config.php';
 
-    // Démarrer ou reprendre la session
-    session_start();
+    // Démarre une session si aucune n'est active
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
     // Supprimer toutes les données de la session
     $_SESSION = [];

@@ -13,10 +13,10 @@
     }
 
     // Récupération et validation des données du formulaire
-    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING); // Nettoie le nom
-    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL); // Vérifie et nettoie l'email
-    $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING); // Nettoie le mot de passe
-    $password_confirmation = filter_input(INPUT_POST, 'password_confirmation', FILTER_SANITIZE_STRING); // Vérifie la confirmation du mot de passe
+    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8'); // Nettoie le nom 
+    $email = htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8'); // Vérifie et nettoie l'email
+    $password = htmlspecialchars($_POST['password'], ENT_QUOTES, 'UTF-8'); // Nettoie le mot de passe
+    $password_confirmation = htmlspecialchars($_POST['password_confirmation'], ENT_QUOTES, 'UTF-8'); // Vérifie la confirmation du mot de passe
 
     // Vérification que tous les champs sont remplis
     if (!$name || !$email || !$password || !$password_confirmation) {
