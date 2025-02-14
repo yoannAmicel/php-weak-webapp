@@ -37,6 +37,9 @@
 
         <!-- Formulaire d'inscription -->
         <form method="POST" action="?action=register.submit">
+
+            <!-- S.Register.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             
             <!-- Champ "Nom" -->
             <div class="mb-4">

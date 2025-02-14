@@ -9,12 +9,41 @@
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
 
+    // Empêche l'accès direct au fichier (bonne pratique)
+    if (basename($_SERVER['PHP_SELF']) === 'password_reset.submit.php') {
+        header('HTTP/1.1 403 Forbidden');
+        exit('Direct access to this file is not allowed.');
+    }    
+
+    // Vérifie que la connexion à la base de données est bien initialisée
+    if (!isset($pdo)) {
+        // Renvoie un message d'erreur si la variable n'est pas initialisée
+        $_SESSION['error_message'] = "Error: Database connection not defined.";
+        header('Location: /?page=home');
+        exit;
+    }
+
     // Vérification que la requête est bien une requête POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405); 
         $_SESSION['error_message'] = 'Method not allowed'; 
         header('Location: /?page=reset'); 
         exit; 
+    }
+
+    // S.Forgot.2 - Vérification du token CSRF pour éviter les attaques CSRF
+    if (isset($_POST['csrf_token'])) {
+        if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
+            http_response_code(403); 
+            $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+            header('Location: /?page=forgot-password'); 
+            exit;
+        }
+    } else {
+        http_response_code(403); 
+        $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+        header('Location: /?page=forgot-password'); 
+        exit;
     }
 
     // Récupération et validation de l'email
@@ -37,13 +66,14 @@
         $user = $stmt->fetch(); // Récupération des données utilisateur
 
         if ($user) {
+            $hashedToken = password_hash($token, PASSWORD_BCRYPT);
             // Mise à jour de la base de données avec le token et la date d'expiration
             $stmt = $pdo->prepare("
                 UPDATE users 
                 SET reset_token = :token, reset_token_expiry = DATE_ADD(NOW(), INTERVAL 1 HOUR) 
                 WHERE email = :email
             ");
-            $stmt->execute(['token' => $token, 'email' => $email]);
+            $stmt->execute(['token' => $hashedToken, 'email' => $email]);
         }
 
         // Création du lien de réinitialisation avec le token généré

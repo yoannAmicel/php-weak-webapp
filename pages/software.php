@@ -46,6 +46,9 @@
                 <!-- Formulaire de soumission -->
                 <form method="POST" action="?action=software.submit" class="grid gap-4" onsubmit="forceUpperCase(event)">
                     <input type="hidden" name="action" value="add">
+
+                    <!-- Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                     
                     <!-- Champ pour le nom du software (converti automatiquement en majuscules) -->
                     <div>
@@ -143,6 +146,9 @@
                 <!-- ID du software à supprimer (caché) -->
                 <input type="hidden" id="delete-software-id" name="id" value="">
                 <input type="hidden" name="action" value="delete">
+
+                <!-- Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 
                 <!-- Boutons pour annuler ou confirmer la suppression -->
                 <div class="flex justify-end space-x-4">

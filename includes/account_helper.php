@@ -3,10 +3,24 @@
     // Inclusion du fichier de configuration 
     require_once '../config/config.php';
 
+    // Empêche l'accès direct au fichier (bonne pratique)
+    if (basename($_SERVER['PHP_SELF']) === 'account_helper.php') {
+        header('HTTP/1.1 403 Forbidden');
+        exit('Direct access to this file is not allowed.');
+    }
+
     // Démarre une session si aucune n'est active
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+        session_regenerate_id(true);
     }
+
+    // S.Account.1 - Génère un token CSRF unique pour chaque session utilisateur
+    // Il sera utilisé pour vérifier que la requête POST vient bien du formulaire et non d'un attaquant
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); // Génère une chaîne sécurisée en hexadécimal
+    }
+
 
     // Vérifie que la connexion à la base de données est bien initialisée
     if (!isset($pdo)) {
@@ -41,6 +55,7 @@
             exit;
         }
     } catch (PDOException $e) {
+        error_log("Retrieving user data error: " . $e->getMessage(), 3, '../logs/error.log');
         $_SESSION['error_message'] = "Error retrieving user data.";
         header('Location: /?page=account');
         exit;

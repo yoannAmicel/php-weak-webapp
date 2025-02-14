@@ -56,6 +56,10 @@
 
                             <!-- Formulaire d'approbation/rejet de la news -->
                             <form method="POST" action="?action=validation.submit" class="flex space-x-4">
+
+                                <!-- Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
                                 <input type="hidden" name="news_id" value="<?= htmlspecialchars($news['id']) ?>">
                                 <!-- Bouton pour approuver la news -->
                                 <button type="submit" name="approve" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
