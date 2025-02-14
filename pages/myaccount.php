@@ -37,6 +37,9 @@
         <?php if (hasPermission('admin', $pdo) || hasPermission('user', $pdo)): ?>
             <form method="POST" enctype="multipart/form-data" action="?action=account.submit">
 
+                <!-- S.Account.1 - Champ caché contenant le token CSRF -->
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
+
                 <!-- Section "Général" -->
                 <div class="mb-8">
                     <h3 class="text-lg font-semibold mb-4 text-gray-600 border-b border-gray-300 pb-2">General</h3>
@@ -141,6 +144,10 @@
             </button>
             <!-- Bouton Confirmer -->
             <form method="POST" action="?action=account.submit">
+
+                <!-- S.Account.1 - Champ caché contenant le token CSRF -->
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
+                
                 <button type="submit" name="delete_account" value="1"
                     class="py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700">
                     Confirm

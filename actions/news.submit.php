@@ -3,9 +3,16 @@
     // Inclusion de la configuration
     require_once '../config/config.php';
 
+    // Empêche l'accès direct au fichier (bonne pratique)
+    if (basename($_SERVER['PHP_SELF']) === 'news.submit.php') {
+        header('HTTP/1.1 403 Forbidden');
+        exit('Direct access to this file is not allowed.');
+    }
+
     // Démarre une session si aucune n'est active
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+        session_regenerate_id(true);
     }
 
     // Vérification de la connexion à la base de données
@@ -18,6 +25,21 @@
 
     // Gestion des requêtes POST (ajout de commentaires, suppression, ajout de news)
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        // S.News.2 - Vérification du token CSRF pour éviter les attaques CSRF
+        if (isset($_POST['csrf_token'])) {
+            if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
+                http_response_code(403); 
+                $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+                header('Location: /?page=news'); 
+                exit;
+            }
+        } else {
+            http_response_code(403); 
+            $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+            header('Location: /?page=news'); 
+            exit;
+        }
 
         // Vérifie si un fichier trop volumineux a été envoyé
         if (empty($_POST) && empty($_FILES) && $_SERVER['CONTENT_LENGTH'] > 0) {
@@ -39,6 +61,44 @@
             $profile_picture_path = '/uploads/account.png';
             $username = 'Anonymous';
             $user_id = null; // Par défaut, l'utilisateur n'est pas connecté
+
+            // S.News.1 - Filtrage SQLi
+            // Vérification et filtrage de l'ID de la news (doit être un entier valide)
+            if (!isset($_POST['news_id']) || !filter_var($_POST['news_id'], FILTER_VALIDATE_INT)) {
+                $_SESSION['error_message'] = "Invalid News ID.";
+                header('Location: /?page=news');
+                exit;
+            }
+            $news_id = intval($_POST['news_id']);
+
+            // Vérification de l'existence de la news avant d'insérer un commentaire
+            $stmt = $pdo->prepare("SELECT id FROM news WHERE id = ?");
+            $stmt->execute([$news_id]);
+            if (!$stmt->fetchColumn()) {
+                $_SESSION['error_message'] = "News not found.";
+                header('Location: /?page=news');
+                exit;
+            }
+
+            // Validation du commentaire (évite les scripts malveillants)
+            $comment = trim($_POST['comment'] ?? '');
+            if (empty($comment) || strlen($comment) > 500) {
+                $_SESSION['error_message'] = "Invalid comment. It must be between 1 and 500 characters.";
+                header('Location: /?page=news');
+                exit;
+            }
+            $comment = htmlspecialchars($comment, ENT_QUOTES, 'UTF-8');
+
+            // Vérification et sécurisation du nom d'utilisateur
+            $username = isset($_POST['name']) ? trim($_POST['name']) : 'Anonymous';
+            if (!empty($username) && strlen($username) > 50) {
+                $_SESSION['error_message'] = "Invalid username. Max 50 characters.";
+                header('Location: /?page=news');
+                exit;
+            }
+            $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
+
+
         
             // Vérifie si l'utilisateur est connecté et récupère ses informations
             if (isset($_SESSION['user']['id'])) {
@@ -53,6 +113,7 @@
                         $profile_picture_path = $user['profile_picture'];
                     }
                 } catch (PDOException $e) {
+                    error_log("Retrieving user data error: " . $e->getMessage(), 3, '../logs/error.log');
                     $_SESSION['error_message'] = 'Error fetching user data.';
                     header('Location: /?page=news');
                     exit;
@@ -85,8 +146,27 @@
                 }
             }
         
-            // Insertion du commentaire en base de données
+            
             try {
+                // S.News.5 - Limitation des tentatives d’ajout d'un commentaire
+                $ipAddress = $_SERVER['REMOTE_ADDR'];
+
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM comment_attempts WHERE ip_address = ? AND created_at >= NOW() - INTERVAL 5 MINUTE");
+                $stmt->execute([$ipAddress]);
+                $attemptCount = $stmt->fetchColumn();
+                
+                // Blocage après 3 ajouts en moins de 5 minutes
+                if ($attemptCount >= 3) {
+                    $_SESSION['error_message'] = 'Too many comments. Please wait.';
+                    header('Location: /?page=news');
+                    exit;
+                }              
+                
+                // Enregistrer la tentative dans la base de données
+                $stmt = $pdo->prepare("INSERT INTO comment_attempts (ip_address, created_at) VALUES (?, NOW())");
+                $stmt->execute([$ipAddress]); 
+
+                // Insertion du commentaire en base de données
                 $stmt = $pdo->prepare("
                     INSERT INTO news_comment (news_id, username, comment, profile_picture, userID, created_at) 
                     VALUES (:news_id, :username, :comment, :profile_picture, :user_id, NOW())
@@ -103,6 +183,7 @@
                 header('Location: /?page=news');
                 exit;
             } catch (PDOException $e) {
+                error_log("Adding comment error: " . $e->getMessage(), 3, '../logs/error.log');
                 $_SESSION['error_message'] = 'Error adding comment.';
                 header('Location: /?page=news');
                 exit;
@@ -116,8 +197,14 @@
             /*    Suppression d'un commentaire    */
             /**************************************/
 
+            // S.News.1 - Filtrage SQLi
             // Récupération et conversion en entier de l'ID du commentaire
-            $comment_id = intval($_POST['comment_id']); 
+            if (!isset($_POST['comment_id']) || !filter_var($_POST['comment_id'], FILTER_VALIDATE_INT)) {
+                $_SESSION['error_message'] = "Invalid Comment ID.";
+                header('Location: /?page=news');
+                exit;
+            }
+            $comment_id = intval($_POST['comment_id']);
     
             try {
                 // Vérifier si le commentaire existe et récupérer l'ID de l'utilisateur qui l'a posté
@@ -150,6 +237,7 @@
                 }
             } catch (PDOException $e) {
                 // Gestion des erreurs SQL
+                error_log("Deleting comment error: " . $e->getMessage(), 3, '../logs/error.log');
                 $_SESSION['error_message'] = 'Error deleting comment.'; 
                 header('Location: /?page=news');
                 exit;
@@ -163,8 +251,14 @@
             /*      Suppression d'une news        */
             /**************************************/
             
-            // Récupération et conversion en entier de l'ID de la news
-            $news_id = intval($_POST['news_id']); 
+            // S.News.1 - Filtrage SQLi
+            // Vérification et filtrage de l'ID de la news (doit être un entier valide)
+            if (!isset($_POST['news_id']) || !filter_var($_POST['news_id'], FILTER_VALIDATE_INT)) {
+                $_SESSION['error_message'] = "Invalid News ID.";
+                header('Location: /?page=news');
+                exit;
+            }
+            $news_id = intval($_POST['news_id']);
     
             // Vérification si l'utilisateur a le droit de supprimer des news (doit être admin)
             if (hasPermission('admin', $pdo)) {
@@ -194,6 +288,7 @@
                     }
                 } catch (PDOException $e) {
                     // Gestion des erreurs SQL
+                    error_log("Deleting news error: " . $e->getMessage(), 3, '../logs/error.log');
                     $_SESSION['error_message'] = 'Error deleting news.'; 
                 }
             } else {
@@ -220,6 +315,42 @@
                 $software = $_POST['software'] ?? ''; // Software associé à la news
                 $published_date = $_POST['published_date'] ?? date('Y-m-d'); // Date de publication par défaut : aujourd'hui
                 $image_path = '/img/news/default.jpg'; // Chemin par défaut de l'image
+
+                // Vérification et filtrage du titre de la news
+                $title = trim($_POST['title'] ?? '');
+                if (empty($title) || strlen($title) > 255) {
+                    $_SESSION['error_message'] = "Invalid title. Max 255 characters.";
+                    header('Location: /?page=news');
+                    exit;
+                }
+                $title = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+
+                // Vérification et filtrage du contenu
+                $content = trim($_POST['content'] ?? '');
+                if (empty($content) || strlen($content) > 5000) {
+                    $_SESSION['error_message'] = "Invalid content. Max 5000 characters.";
+                    header('Location: /?page=news');
+                    exit;
+                }
+                $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+
+                // Vérification et validation du logiciel associé
+                $software = trim($_POST['software'] ?? '');
+                if (!empty($software) && strlen($software) > 100) {
+                    $_SESSION['error_message'] = "Invalid software name.";
+                    header('Location: /?page=news');
+                    exit;
+                }
+                $software = htmlspecialchars($software, ENT_QUOTES, 'UTF-8');
+
+                // Vérification de la date de publication
+                $published_date = $_POST['published_date'] ?? date('Y-m-d');
+                if (!DateTime::createFromFormat('Y-m-d', $published_date)) {
+                    $_SESSION['error_message'] = "Invalid date format.";
+                    header('Location: /?page=news');
+                    exit;
+                }
+
     
                 // Gestion de l'upload d'une image pour la news
                 if (!empty($_FILES['image']['name']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -249,6 +380,25 @@
                 }
     
                 try {
+                    
+                    // S.News.5 - Limitation des tentatives d’ajout de news
+                    $ipAddress = $_SERVER['REMOTE_ADDR'];
+
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM comment_attempts WHERE ip_address = ? AND created_at >= NOW() - INTERVAL 5 MINUTE");
+                    $stmt->execute([$ipAddress]);
+                    $attemptCount = $stmt->fetchColumn();
+                    
+                    // Blocage après 3 ajouts en moins de 5 minutes
+                    if ($attemptCount >= 3) {
+                        $_SESSION['error_message'] = 'Too many news. Please wait.';
+                        header('Location: /?page=news');
+                        exit;
+                    }              
+                    
+                    // Enregistrer la tentative dans la base de données
+                    $stmt = $pdo->prepare("INSERT INTO comment_attempts (ip_address, created_at) VALUES (?, NOW())");
+                    $stmt->execute([$ipAddress]);
+                    
                     // Insertion de la news en base de données avec statut "pending"
                     $stmt = $pdo->prepare("
                         INSERT INTO news (title, content, image_url, source, published_date, status, comments_count) 
@@ -261,6 +411,7 @@
                     exit;
                 } catch (PDOException $e) {
                     // Gestion des erreurs SQL
+                    error_log("Adding news error: " . $e->getMessage(), 3, '../logs/error.log');
                     $_SESSION['error_message'] = 'Error adding news.'; 
                     header('Location: /?page=news');
                     exit;

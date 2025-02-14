@@ -3,6 +3,18 @@
     // Inclusion des routes et éventuelles fonctions globales
     require_once '../functions/routes.php'; 
 
+    // Empêche l'accès direct au fichier (bonne pratique)
+    if (basename($_SERVER['PHP_SELF']) === 'header_helper.php') {
+        header('HTTP/1.1 403 Forbidden');
+        exit('Direct access to this file is not allowed.');
+    }
+
+    // S.Contact.3
+    header("X-Frame-Options: DENY"); // Protège contre le Clickjacking
+    header("X-Content-Type-Options: nosniff"); // Empêche les types MIME incorrects
+    header("Referrer-Policy: no-referrer-when-downgrade"); // Restriction sur l'envoi du referer
+    // header("Content-Security-Policy: default-src 'self'"); // Empêche les scripts externes dangereux (suppression due à Tailwind) 
+
     // Déclaration explicite de $pdo en global pour accéder à la connexion à la base de données
     global $pdo;
     
@@ -10,6 +22,7 @@
     // Objectif : protection contre les CSRF
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+        session_regenerate_id(true);
     }
 
     // Vérification de la connexion à la base de données
@@ -73,6 +86,7 @@
             $pendingCount = 0;
             
             // Renvoie un message d'erreur si la requête n'aboutie pas
+            error_log("Pending news count error: " . $e->getMessage(), 3, '../logs/error.log');
             $_SESSION['error_message'] = "Error: Unable to retrieve pending news count.";
             header('Location: /?page=home');
             exit;

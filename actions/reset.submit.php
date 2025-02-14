@@ -3,9 +3,37 @@
     require_once '../config/config.php';
     require_once '../functions/security.php';
 
+    // Empêche l'accès direct au fichier (bonne pratique)
+    if (basename($_SERVER['PHP_SELF']) === 'reset.submit.php') {
+        header('HTTP/1.1 403 Forbidden');
+        exit('Direct access to this file is not allowed.');
+    }   
+
+    // Vérifie que la connexion à la base de données est bien initialisée
+    if (!isset($pdo)) {
+        // Renvoie un message d'erreur si la variable n'est pas initialisée
+        $_SESSION['error_message'] = "Error: Database connection not defined.";
+        header('Location: /?page=home');
+        exit;
+    }
 
     // Vérifier si le formulaire a été soumis
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        // Vérification du token CSRF pour éviter les attaques CSRF
+        if (isset($_POST['csrf_token'])) {
+            if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
+                http_response_code(403); 
+                $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+                header('Location: /?page=reset'); 
+                exit;
+            }
+        } else {
+            http_response_code(403); 
+            $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+            header('Location: /?page=reset'); 
+            exit;
+        }
 
         // Récupérer le mot de passe saisi
         $token = $_POST['token'] ?? ''; 
@@ -18,15 +46,12 @@
         $passwordPolicy = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{12,}$/';
 
         if (empty($newPassword) || empty($confirmPassword)) {
-            echo "1";
             // Vérifier si les champs sont remplis
             $_SESSION['error_message'] = 'Please fill in both password fields.';
         } elseif ($newPassword !== $confirmPassword) {
-            echo "2";
             // Vérifier si les deux mots de passe sont identiques
             $_SESSION['error_message'] = 'Passwords do not match.';
         } elseif (!preg_match($passwordPolicy, $newPassword)) {
-            echo "3";
             // Vérifier si le mot de passe respecte la politique de sécurité
             $_SESSION['error_message'] = 'Password must contain, at least :
                 12 characters
@@ -38,15 +63,24 @@
             header('Location: /?page=reset&token=' . $token);
             exit;
         } else {
-            echo "4";
             // Si toutes les conditions sont remplies, hacher le mot de passe
             $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
             try {
-                // Récupérer l'utilisateur associé au token de réinitialisation et vérifier s'il est encore valide
-                $stmt = $pdo->prepare("SELECT * FROM users WHERE reset_token = :token AND reset_token_expiry > NOW()");
-                $stmt->execute(['token' => $token]);
-                $user = $stmt->fetch();
+                // Récupérer l'utilisateur associé au token de réinitialisation sans exposer le token en clair
+                $stmt = $pdo->prepare("SELECT id, email, reset_token, reset_token_expiry FROM users WHERE reset_token IS NOT NULL AND reset_token_expiry > NOW()");
+                $stmt->execute();
+                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $user = null;
+
+                // Vérifier le token haché avec password_verify()
+                foreach ($users as $row) {
+                    if (password_verify($token, $row['reset_token'])) {
+                        $user = $row;
+                        break;
+                    }
+                }
 
                 if (!$user) {
                     // Si aucun utilisateur correspondant n'est trouvé ou que le token est expiré

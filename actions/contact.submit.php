@@ -7,6 +7,12 @@
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
 
+    // Empêche l'accès direct au fichier (bonne pratique)
+    if (basename($_SERVER['PHP_SELF']) === 'contact.submit.php') {
+        header('HTTP/1.1 403 Forbidden');
+        exit('Direct access to this file is not allowed.');
+    }
+
     // Vérifie que la méthode HTTP utilisée est POST (pour éviter les accès non autorisés)
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405); 
@@ -15,8 +21,15 @@
         exit;
     }
 
-    // Vérification du token CSRF pour éviter les attaques CSRF
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    // S.Contact.4 - Vérification du token CSRF pour éviter les attaques CSRF
+    if (isset($_POST['csrf_token'])) {
+        if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
+            http_response_code(403); 
+            $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
+            header('Location: /?page=contact'); 
+            exit;
+        }
+    } else {
         http_response_code(403); 
         $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
         header('Location: /?page=contact'); 
@@ -37,6 +50,19 @@
         exit;
     }
 
+    // Validation plus stricte du nom (uniquement lettres et espaces)
+    if (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
+        $_SESSION['error_message'] = "Invalid name format.";
+        header('Location: /?page=contact');
+        exit;
+    }
+
+    // Vérification de la longueur du message (évite les abus)
+    if (strlen($message) < 10 || strlen($message) > 500) {
+        $_SESSION['error_message'] = "Your message must be between 10 and 500 characters.";
+        header('Location: /?page=contact');
+        exit;
+    }
 
 
 
@@ -63,7 +89,15 @@
         // Vérification du reCAPTCHA pour prévenir les robots spammeurs
         $recaptchaSecret = getVaultSecret("apps/data/avenix/captcha", "private_key"); // Récupération de la clé secrète
         $recaptchaURL = 'https://www.google.com/recaptcha/api/siteverify';
-        $recaptchaResponse = file_get_contents("$recaptchaURL?secret=$recaptchaSecret&response=$recaptchaToken");
+        // Vérification du reCAPTCHA via cURL
+        $ch = curl_init($recaptchaURL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'secret' => $recaptchaSecret,
+            'response' => $recaptchaToken
+        ]));
+        $recaptchaResponse = curl_exec($ch);
+        curl_close($ch);
         $recaptchaData = json_decode($recaptchaResponse, true);
 
         // Vérifie si la validation du reCAPTCHA a échoué

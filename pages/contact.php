@@ -10,17 +10,20 @@
     <title>Contact</title>
 
     <!-- Chargement de l'API Google reCAPTCHA v3 avec la clé publique récupérée depuis Vault -->
-    <script src="https://www.google.com/recaptcha/api.js?render=<?php print(getVaultSecret("apps/data/avenix/captcha", "public_key"))?>"></script>
-    <script>
-        // Attente de la disponibilité de reCAPTCHA avant exécution
-        grecaptcha.ready(function() {
-            // Exécute reCAPTCHA avec l'action "contact_form" pour identifier la soumission du formulaire
-            grecaptcha.execute('<?php print(getVaultSecret("apps/data/avenix/captcha", "public_key"))?>', { action: 'contact_form' }).then(function(token) {
-                // Insère le jeton reCAPTCHA généré dans un champ caché du formulaire
-                document.getElementById('recaptcha-token').value = token;
+    <script src="https://www.google.com/recaptcha/api.js?render=<?php print(getVaultSecret("apps/data/avenix/captcha", "public_key") ?? '')?>"></script>
+    <?php if (!empty(getVaultSecret("apps/data/avenix/captcha", "public_key"))): ?>
+        <!-- S.Contact.6 - Encapsulation de Recaptcha -->
+        <script src="https://www.google.com/recaptcha/api.js?render=<?= htmlspecialchars(getVaultSecret("apps/data/avenix/captcha", "public_key")) ?>"></script>
+        <script>
+            grecaptcha.ready(function() {
+                grecaptcha.execute("<?= htmlspecialchars(getVaultSecret("apps/data/avenix/captcha", "public_key")) ?>", { action: "contact_form" }).then(function(token) {
+                    document.getElementById('recaptcha-token').value = token;
+                });
             });
-        });
-    </script>
+        </script>
+    <?php else: ?>
+        <script>console.error("reCAPTCHA key is missing.");</script>
+    <?php endif; ?>
 </head>
 
 

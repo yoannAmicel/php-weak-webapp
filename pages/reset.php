@@ -44,6 +44,9 @@
             <!-- Formulaire de réinitialisation du mot de passe -->
             <form method="POST" action="?action=reset.submit">
 
+            <!-- S.Reset.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
                 <!-- Champ caché pour le token -->
                 <input type="hidden" name="token" value="<?= htmlspecialchars($_GET['token'] ?? '') ?>">
                 

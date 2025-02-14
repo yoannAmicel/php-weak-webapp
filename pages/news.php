@@ -41,6 +41,10 @@
                 <!-- Section Ajout d'une News -->
                 <h2 class="text-2xl font-bold mb-4">Add News</h2>
                 <form method="POST" enctype="multipart/form-data" action="?action=news.submit">
+
+                    <!-- S.News.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
                     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                         <!-- Section Image -->
                         <div class="col-span-2">
@@ -180,6 +184,10 @@
                                             <!-- Bouton Delete visible UNIQUEMENT si l'utilisateur est connecté et A LES DROITS -->
                                             <?php if (isset($_SESSION['user']) && (hasPermission('admin', $pdo) || $_SESSION['user']['id'] == $comment['userID'])): ?>
                                                 <form method="POST" action="?action=news.submit" class="ml-4">
+                                                    
+                                                    <!-- S.News.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                                                
                                                     <input type="hidden" name="delete_comment" value="1">
                                                     <input type="hidden" name="comment_id" value="<?= htmlspecialchars($comment['id']) ?>">
                                                     <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
@@ -206,6 +214,9 @@
                         <div class="add-comment-form bg-gray-100 p-4 rounded-lg">
                             <form method="POST" enctype="multipart/form-data" action="?action=news.submit">
                                 <input type="hidden" name="news_id" value="<?= htmlspecialchars($news['id']) ?>">
+
+                                <!-- S.News.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
                                 <!-- Champ pour uploader une photo de profil (si l'utilisateur n'est pas connecté) -->
                                 <?php if (!isset($_SESSION['user'])): ?>
@@ -285,6 +296,9 @@
         <form id="delete-news-form" method="POST" action="?action=news.submit">
             <!-- Champ caché pour stocker l'ID de la news à supprimer -->
             <input type="hidden" id="delete-news-id" name="news_id" value="">
+
+            <!-- S.News.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
             <!-- Champ caché pour indiquer que l'on effectue une suppression -->
             <input type="hidden" name="delete_news" value="1">

@@ -2,6 +2,7 @@
 
 <?php
     include '../includes/header.php';
+    include '../includes/forgot_helper.php';
 ?>
 
 
@@ -45,6 +46,9 @@
 
             <!-- Formulaire de réinitialisation du mot de passe -->
             <form method="POST" action="?action=password_reset.submit">
+
+                <!-- S.Forgot.2 - Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 
                 <!-- Champ pour saisir l'adresse e-mail -->
                 <div class="mb-4">

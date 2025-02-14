@@ -104,6 +104,10 @@
                                 <div class="flex items-center space-x-4">
                                     <!-- Formulaire pour changer le rôle d'un utilisateur -->
                                     <form method="POST" action="?action=users.submit">
+                                        
+                                        <!-- Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
                                         <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['id']) ?>">
                                         <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                                             <select name="role" class="border rounded px-2 py-1">
@@ -118,6 +122,10 @@
                                     <!-- Boutons de blocage / déblocage -->
                                     <?php if ($user['role'] !== 'admin'): ?>
                                         <form method="POST" action="?action=users.submit">
+
+                                            <!-- Protection CSRF : Inclusion du token pour vérifier l'authenticité de la requête -->
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
                                             <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['id']) ?>">
                                             <?php if ($user['is_blocked']): ?>
                                                 <button type="submit" name="unblock" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">

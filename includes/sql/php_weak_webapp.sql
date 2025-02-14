@@ -45,6 +45,18 @@ CREATE TABLE `audit_logs` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `comment_attempts`
+--
+
+CREATE TABLE `comment_attempts` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `contact_attempts`
 --
 
@@ -119,7 +131,17 @@ CREATE TABLE `users` (
   `is_blocked` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Structure de la table `login_attempts`
+--
+
+CREATE TABLE `login_attempts` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 
 
@@ -159,12 +181,26 @@ ALTER TABLE `audit_logs`
   ADD KEY `admin_id` (`admin_id`),
   ADD KEY `user_id` (`user_id`);
 
+--
+-- Index pour la table `comment_attempts`
+--
+ALTER TABLE `comment_attempts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_created` (`ip_address`,`created_at`);
 
 --
 -- Index pour la table `contact_attempts`
 --
 ALTER TABLE `contact_attempts`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_created` (`ip_address`,`created_at`);
+
+--
+-- Index pour la table `login_attempts`
+--
+ALTER TABLE `login_attempts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_created` (`ip_address`,`created_at`);
 
 --
 -- Index pour la table `news`
@@ -307,10 +343,22 @@ ALTER TABLE `audit_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
+-- AUTO_INCREMENT pour la table `comment_attempts`
+--
+ALTER TABLE `comment_attempts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `contact_attempts`
 --
 ALTER TABLE `contact_attempts`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT pour la table `login_attempts`
+--
+ALTER TABLE `login_attempts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `news`
