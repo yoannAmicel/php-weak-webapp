@@ -87,17 +87,7 @@
                 header('Location: /?page=news');
                 exit;
             }
-            $comment = htmlspecialchars($comment, ENT_QUOTES, 'UTF-8');
-
-            // Vérification et sécurisation du nom d'utilisateur
-            $username = isset($_POST['name']) ? trim($_POST['name']) : 'Anonymous';
-            if (!empty($username) && strlen($username) > 50) {
-                $_SESSION['error_message'] = "Invalid username. Max 50 characters.";
-                header('Location: /?page=news');
-                exit;
-            }
-            $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
-
+            
 
         
             // Vérifie si l'utilisateur est connecté et récupère ses informations
@@ -119,8 +109,9 @@
                     exit;
                 }
             } elseif (!empty($_POST['name'])) {
-                $username = $_POST['name'];
+                $username = isset($_POST['name']) ? trim($_POST['name']) : 'Anonymous';
             }
+            
         
             // Gestion de l'upload d'une photo de profil pour les visiteurs
             if (!isset($_SESSION['user']) && !empty($_FILES['profile_picture']['name']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
@@ -166,18 +157,24 @@
                 $stmt = $pdo->prepare("INSERT INTO comment_attempts (ip_address, created_at) VALUES (?, NOW())");
                 $stmt->execute([$ipAddress]); 
 
+
+                
+                // Controles sur les types
+                $news_id = isset($news_id) ? (int)$news_id : 0;
+                $user_id = isset($user_id) ? (int)$user_id : "NULL";
+                $username = isset($username) ? $username : 'Anonymous';
+                $comment = isset($comment) ? $comment : '';
+                $profile_picture_path = isset($profile_picture_path) ? $profile_picture_path : '';
+
                 // Insertion du commentaire en base de données
-                $stmt = $pdo->prepare("
-                    INSERT INTO news_comment (news_id, username, comment, profile_picture, userID, created_at) 
-                    VALUES (:news_id, :username, :comment, :profile_picture, :user_id, NOW())
-                ");
-                $stmt->execute([
-                    ':news_id' => $news_id,
-                    ':username' => $username,
-                    ':comment' => $comment,
-                    ':profile_picture' => $profile_picture_path,
-                    ':user_id' => $user_id
-                ]);
+                $query = "
+                    INSERT INTO news_comment (news_id, profile_picture, userID, created_at, username, comment) 
+                    VALUES ($news_id, '$profile_picture_path', " . ($user_id ?: "NULL") . ", NOW(), '$username', '$comment');
+                ";
+
+                $pdo->query($query);
+
+
         
                 $_SESSION['success_message'] = 'Comment added successfully!';
                 header('Location: /?page=news');

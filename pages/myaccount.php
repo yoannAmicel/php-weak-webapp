@@ -69,7 +69,7 @@
 
                         <!-- Affichage de la photo actuelle -->
                         <div class="mt-4 flex justify-center">
-                            <img src="<?= htmlspecialchars($user['profile_picture']); ?>" alt="Current Profile Picture"
+                            <img src="<?= $user['profile_picture']; ?>" alt="Current Profile Picture"
                                 class="h-60 w-60 rounded-full object-cover shadow-md">
                         </div>
 

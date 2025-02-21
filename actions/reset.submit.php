@@ -1,7 +1,6 @@
 <?php
 
     require_once '../config/config.php';
-    require_once '../functions/security.php';
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'reset.submit.php') {
@@ -25,13 +24,13 @@
             if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
                 http_response_code(403); 
                 $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
-                header('Location: /?page=reset'); 
+                header('Location: /?page=login'); 
                 exit;
             }
         } else {
             http_response_code(403); 
             $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
-            header('Location: /?page=reset'); 
+            header('Location: /?page=login'); 
             exit;
         }
 
@@ -48,9 +47,13 @@
         if (empty($newPassword) || empty($confirmPassword)) {
             // Vérifier si les champs sont remplis
             $_SESSION['error_message'] = 'Please fill in both password fields.';
+            header('Location: /?page=reset&token=' . $token);
+            exit;
         } elseif ($newPassword !== $confirmPassword) {
             // Vérifier si les deux mots de passe sont identiques
             $_SESSION['error_message'] = 'Passwords do not match.';
+            header('Location: /?page=reset&token=' . $token);
+            exit;
         } elseif (!preg_match($passwordPolicy, $newPassword)) {
             // Vérifier si le mot de passe respecte la politique de sécurité
             $_SESSION['error_message'] = 'Password must contain, at least :

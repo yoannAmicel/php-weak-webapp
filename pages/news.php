@@ -175,7 +175,7 @@
                                                 class="w-12 h-12 rounded-full mr-4">
                                             <div class="flex-grow">
                                                 <p class="font-bold text-gray-800">
-                                                    <?= htmlspecialchars($comment['username'] ?? 'Anonymous') ?>
+                                                    <?= $comment['username'] ?? 'Anonymous' ?>
                                                 </p>
                                                 <p class="text-gray-600">"<?= htmlspecialchars($comment['comment'] ?? '') ?>"</p>
                                                 <p class="text-xs text-gray-400">Posted on <?= htmlspecialchars($comment['created_at'] ?? '') ?></p>
