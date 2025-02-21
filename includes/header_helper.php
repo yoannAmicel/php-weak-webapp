@@ -1,7 +1,7 @@
 <?php
     require_once '../config/config.php'; 
     // Inclusion des routes et éventuelles fonctions globales
-    require_once '../functions/routes.php'; 
+    require_once '../config/routes.php'; 
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'header_helper.php') {
@@ -9,6 +9,7 @@
         exit('Direct access to this file is not allowed.');
     }
 
+    
     // S.Contact.3
     header("X-Frame-Options: DENY"); // Protège contre le Clickjacking
     header("X-Content-Type-Options: nosniff"); // Empêche les types MIME incorrects

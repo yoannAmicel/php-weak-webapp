@@ -2,9 +2,9 @@
 
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
-define('DB_NAME', getVaultSecret("apps/data/avenix/database", "db_database"));
-define('DB_USER', getVaultSecret("apps/data/avenix/database", "db_username"));
-define('DB_PASS', getVaultSecret("apps/data/avenix/database", "db_password"));
+define('DB_NAME', 'php_weak_webapp');
+define('DB_PASS', '%67W&q@0Y#uy!Ov=q)TC~jx6');
+define('DB_USER', 'webapp_user');
 
 // Activer les erreurs en mode développement
 ini_set('display_errors', 1);
@@ -31,11 +31,11 @@ try {
 // Démarrer une session sécurisée
 session_start([
     'cookie_lifetime' => SESSION_LIFETIME,
-    'cookie_httponly' => true,
+    'cookie_httponly' => false,
     'cookie_secure' => isset($_SERVER['HTTPS']),
 ]);
 
-
+/*
 function getVaultSecret($path, $key) {
     $vaultAddr = "https://127.0.0.1:8200"; 
     $vaultToken = "hvs.KrhhLvt05tqLHtSwlXUivx37"; 
@@ -63,7 +63,7 @@ function getVaultSecret($path, $key) {
     $data = json_decode($response, true);
     return $data['data']['data'][$key] ?? null;
 }
-
+*/
 
 function hasPermission($requiredRole, $pdo) {
 

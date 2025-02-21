@@ -1,7 +1,6 @@
 <?php
 
     require_once '../config/config.php';
-    require_once '../functions/security.php';
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'reset_helper.php') {

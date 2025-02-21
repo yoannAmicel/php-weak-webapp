@@ -78,7 +78,7 @@
                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                     <label for="remember_me" class="ml-2 block text-sm text-gray-900">Remember me</label>
                 </div>
-                <a class="text-sm text-indigo-600 hover:text-indigo-500" href="<?= route('forgot-password') ?>">
+                <a class="text-sm text-indigo-600 hover:text-indigo-500" href="<?= route('forgot') ?>">
                     Forgot your password?
                 </a>
             </div>

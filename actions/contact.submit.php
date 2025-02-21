@@ -87,7 +87,7 @@
         $stmt->execute([$ipAddress]);
 
         // Vérification du reCAPTCHA pour prévenir les robots spammeurs
-        $recaptchaSecret = getVaultSecret("apps/data/avenix/captcha", "private_key"); // Récupération de la clé secrète
+        $recaptchaSecret = '6LeCetwqAAAAAMppfDnwj_uMd-XREqusJVGmyceN'; // Récupération de la clé secrète
         $recaptchaURL = 'https://www.google.com/recaptcha/api/siteverify';
         // Vérification du reCAPTCHA via cURL
         $ch = curl_init($recaptchaURL);
@@ -116,7 +116,7 @@
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'avenix.contact@gmail.com'; // Adresse e-mail utilisée pour l'envoi
-        $mail->Password = getVaultSecret("apps/data/avenix/google", "app_password"); // Récupération du mot de passe sécurisé
+        $mail->Password = 'rwdn zved thce dszw'; // Récupération du mot de passe sécurisé
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Chiffrement TLS
         $mail->Port = 587; // Port SMTP
 

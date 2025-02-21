@@ -57,6 +57,9 @@
                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
                         focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
 
+                    <!-- Adresse qui recevra l'email -->
+                    <input type="hidden" name="email_to_send" id="email_to_send" value="">
+
                     <!-- Affichage d'un message d'erreur si l'email est invalide ou manquant -->
                     <?php if (!empty($errors['email'])): ?>
                         <span class="text-red-500 text-sm"><?= htmlspecialchars($errors['email']); ?></span>

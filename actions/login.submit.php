@@ -2,8 +2,6 @@
 
     // Inclusion du fichier de configuration 
     require_once '../config/config.php';
-    // Inclusion du fichier de sécurité 
-    require_once '../functions/security.php';
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'login.submit.php') {
@@ -49,7 +47,7 @@
     }
 
     // S.Login.1 - Récupération et validation des données du formulaire
-    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL); // Vérifie et filtre l'email
+    $email = $_POST['email']; // Vérifie et filtre l'email
     $password = trim($_POST['password']);  // Nettoie la valeur du mot de passe
 
     // Vérification que tous les champs sont remplis
@@ -62,8 +60,8 @@
     
     // Recherche de l'utilisateur dans la base de données
     try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email"); 
-        $stmt->execute(['email' => $email]); 
+        $query = "SELECT * FROM users WHERE email = '$email'";
+        $stmt = $pdo->query($query);
         $user = $stmt->fetch(); 
 
         // S.Login.3 - Vérifier que le compte n’est pas banni
@@ -72,23 +70,7 @@
             header('Location: /?page=login');
             exit;
         }
-
-        // S.Login.2 - Empêche les attaques bruteforce sur les mots de passe
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ? AND created_at >= NOW() - INTERVAL 15 MINUTE");
-        $stmt->execute([$ipAddress]);
-        $attemptCount = $stmt->fetchColumn();
         
-        // Bloque après 5 essais en 15 minutes
-        if ($attemptCount >= 5) {
-            $_SESSION['error_message'] = 'Too many login attempts. Try again later.';
-            header('Location: /?page=login');
-            exit;
-        }
-        
-        // Ajout d'une tentative
-        $stmt = $pdo->prepare("INSERT INTO login_attempts (ip_address, created_at) VALUES (?, NOW())");
-        $stmt->execute([$ipAddress]);
 
 
         // Vérification si l'utilisateur existe et si le mot de passe est correct
@@ -107,6 +89,18 @@
 
         // S.Login.6 - Empêche le vol de session si un attaquant vole un cookie de connexion.
         session_regenerate_id(true);
+
+
+        
+        // Ajout d'un log en cas de connexion réussie
+        $logFile = '../logs/auth.log';
+        $logMessage = "[" . date('Y-m-d H:i:s') . "] Login successful - ID: " . $user['id'] . " - Email: " . $user['email'] . " - Username: " . $user['name'] . " - IP: " . $ipAddress . PHP_EOL;
+
+        // Vérifie si le dossier de logs existe, sinon le créer
+        if (file_exists('../logs')) {
+            file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+        } 
+
 
         // Redirection vers la page d'accueil après connexion réussie
         header('Location: /?page=home');

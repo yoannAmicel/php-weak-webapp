@@ -2,7 +2,6 @@
 
     // Inclusion des fichiers de configuration et de sécurité
     require_once '../config/config.php'; // Connexion à la base de données
-    require_once '../functions/security.php'; // Fonctions de sécurité supplémentaires
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'register.submit.php') {

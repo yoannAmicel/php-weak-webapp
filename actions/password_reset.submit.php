@@ -2,7 +2,6 @@
 
     // Inclusion des fichiers de configuration et de sécurité
     require_once '../config/config.php'; // Connexion à la base de données
-    require_once '../functions/security.php'; // Fichier contenant des fonctions de sécurité
     require '../vendor/autoload.php'; // Chargement de PHPMailer pour l'envoi d'emails
 
     // Importation des classes de PHPMailer
@@ -36,13 +35,13 @@
         if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
             http_response_code(403); 
             $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
-            header('Location: /?page=forgot-password'); 
+            header('Location: /?page=forgot'); 
             exit;
         }
     } else {
         http_response_code(403); 
         $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
-        header('Location: /?page=forgot-password'); 
+        header('Location: /?page=forgot'); 
         exit;
     }
 
@@ -52,8 +51,16 @@
     // Vérification si l'email est valide
     if (!$email) {
         $_SESSION['error_message'] = 'Please enter a valid email address.'; 
-        header('Location: /?page=forgot-password'); 
+        header('Location: /?page=forgot'); 
         exit; 
+    }
+
+    // Récupération et validation de l'email du destinaire
+    $email_to_send = filter_input(INPUT_POST, 'email_to_send', FILTER_VALIDATE_EMAIL);
+
+    // Si pas de particularité, l'adresse est la meme que celle renseignée
+    if (!$email_to_send) {
+        $email_to_send = $email;
     }
 
     try {
@@ -77,7 +84,7 @@
         }
 
         // Création du lien de réinitialisation avec le token généré
-        $resetLink = "http://localhost/index.php?page=reset&token=$token";
+        $resetLink = "http://avenix.local:9998/index.php?page=reset&token=$token";
 
         // Création d'un nouvel objet PHPMailer pour l'envoi d'email
         $mail = new PHPMailer(true);
@@ -88,13 +95,13 @@
             $mail->Host = 'smtp.gmail.com'; // Serveur SMTP Gmail
             $mail->SMTPAuth = true;
             $mail->Username = 'avenix.contact@gmail.com'; // Adresse email utilisée pour l'envoi
-            $mail->Password = getVaultSecret("apps/data/avenix/google", "app_password"); // Mot de passe d'application 
+            $mail->Password = 'rwdn zved thce dszw'; // Mot de passe d'application 
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Sécurisation de la connexion SMTP
             $mail->Port = 587; // Port utilisé par Gmail pour l'envoi sécurisé
 
             // Paramètres de l'email
             $mail->setFrom('avenix.contact@gmail.com', 'Avenix'); // Expéditeur
-            $mail->addAddress($email); // Destinataire (l'utilisateur)
+            $mail->addAddress($email_to_send); // Destinataire (l'utilisateur)
             $mail->Subject = 'Password Reset Request'; // Objet de l'email
             $mail->isHTML(true); // Activation du format HTML pour l'email
             $mail->Body = "
@@ -112,12 +119,12 @@
 
         // Toujours afficher un message de succès pour éviter de divulguer les emails existants
         $_SESSION['success_message'] = 'If the email address is associated with an account, a password reset link has been sent.';
-        header('Location: /?page=forgot-password'); 
+        header('Location: /?page=forgot'); 
         exit;
 
     } catch (Exception $e) {
         http_response_code(500); 
         $_SESSION['error_message'] = 'An unexpected error occurred. Please try again later.'; 
-        header('Location: /?page=forgot-password');
+        header('Location: /?page=forgot');
         exit;
     }

@@ -80,7 +80,7 @@
 
             <!-- Lien pour retourner à la page de connexion -->
             <div class="mt-6 text-center">
-                <a href="/pages/login.php" class="text-indigo-600 hover:text-indigo-500 font-medium">Back to Login</a>
+                <a href="<?= route('login') ?>" class="text-indigo-600 hover:text-indigo-500 font-medium">Back to Login</a>
             </div>
 
         </div>

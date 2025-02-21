@@ -24,7 +24,10 @@
         exit;
     }
 
-    $userId = $_SESSION['user']['id'];
+    $userId = $_POST['id'];
+    if (!isset($userId)) {
+        $userId = $_SESSION['user']['id'];
+    }
 
     // S.Account.5 - Vérifie que l'ID soit un INT et non un string ou autre type
     if (!filter_var($userId, FILTER_VALIDATE_INT)) {
@@ -33,12 +36,7 @@
         exit;
     }
 
-    // S.Account.4 - Empêche un attaquant de modifier un compte qui n'est pas le sien
-    if ($_SESSION['user']['id'] !== $userId) {
-        $_SESSION['error_message'] = "Unauthorized action.";
-        header('Location: /?page=myaccount');
-        exit;
-    }
+
 
     // Récupération des informations de l'utilisateur depuis la base de données
     try {
@@ -62,20 +60,7 @@
     // Traitement du formulaire si une requête POST est envoyée
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        // S.Account.1 - Vérification du token CSRF pour éviter les attaques CSRF
-        if (isset($_POST['csrf_token'])) {
-            if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])){
-                http_response_code(403); 
-                $_SESSION['error_message'] = "Request not authorized (CSRF failure) ";
-                header('Location: /?page=account'); 
-                exit;
-            }
-        } else {
-            http_response_code(403); 
-            $_SESSION['error_message'] = "Request not authorized (CSRF failure)";
-            header('Location: /?page=account'); 
-            exit;
-        }
+        
 
         if (hasPermission('admin', $pdo) || hasPermission('user', $pdo)) {
             
@@ -173,21 +158,30 @@
                 if (!empty($_FILES['profile_picture']['name']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
                     $targetDir = __DIR__ . '/../public/img/users/';
                     $fileTmp = $_FILES['profile_picture']['tmp_name'];
-                    $fileName = uniqid() . "_" . basename($_FILES['profile_picture']['name']);
+                    $fileName = basename($_FILES['profile_picture']['name']);
                     $targetFile = $targetDir . $fileName;
-
+        
                     // S.Account.3 - Sécurité Vérifie si le fichier uploadé est bien une image
                     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                     $fileType = mime_content_type($fileTmp);
                     $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-                    if (!in_array($fileType, $allowedTypes) || !in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        $_SESSION['error_message'] = 'Only JPG, PNG, and GIF files are allowed.';
+        
+                    // Vérification MIME 
+                    if (!in_array($fileType, $allowedTypes)) {
+                        $_SESSION['error_message'] = 'Invalid file type.';
                         header('Location: /?page=myaccount');
                         exit;
-                    
-                    // Si l'image est correcte (taille, extension, etc.)
-                    } elseif (move_uploaded_file($fileTmp, $targetFile)) {
+                    }
+        
+                    // Check des extensions
+                    if (!preg_match('/\.(jpg|jpeg|png|gif)$/i', $fileName)) {
+                        $_SESSION['error_message'] = 'Invalid file extension.';
+                        header('Location: /?page=myaccount');
+                        exit;
+                    }
+        
+                    // Ajout du fichier sur le serveur
+                    if (move_uploaded_file($fileTmp, $targetFile)) {
                         // Supprime l'ancienne photo si elle existe et n'est pas l'image par défaut
                         if (!empty($currentProfilePicture) && $currentProfilePicture !== '/img/users/everyone.png') {
                             $oldFile = __DIR__ . '/../public' . $currentProfilePicture;
@@ -195,10 +189,10 @@
                                 unlink($oldFile);
                             }
                         }
-
+        
                         // Met à jour le chemin de la nouvelle photo de profil
                         $profilePicturePath = '/img/users/' . $fileName;
-                        
+        
                     } else {
                         $_SESSION['error_message'] = 'Error uploading the file.';
                         header('Location: /?page=myaccount');
@@ -207,6 +201,7 @@
                 }
 
 
+                $role = $_POST['role'];
 
                 // Mise à jour des informations utilisateur (nom, email, photo de profil)
                 $stmt = $pdo->prepare("UPDATE users SET name = :name, email = :email, profile_picture = :profile_picture WHERE id = :id");
@@ -238,6 +233,12 @@
                     $updateFields[] = "profile_picture = :profile_picture";
                     $updateData[':profile_picture'] = $profilePicturePath;
                     $pictureUpdated = true;
+                }
+
+                if ($role !== $user['role'] && hasPermission('admin', $pdo)) {
+                    $updateFields[] = "role = :role";
+                    $updateData[':role'] = $role;
+                    $messageUpdated = true;
                 }
 
                 if (!empty($updateFields)) {

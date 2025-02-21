@@ -10,20 +10,18 @@
     <title>Contact</title>
 
     <!-- Chargement de l'API Google reCAPTCHA v3 avec la clé publique récupérée depuis Vault -->
-    <script src="https://www.google.com/recaptcha/api.js?render=<?php print(getVaultSecret("apps/data/avenix/captcha", "public_key") ?? '')?>"></script>
-    <?php if (!empty(getVaultSecret("apps/data/avenix/captcha", "public_key"))): ?>
-        <!-- S.Contact.6 - Encapsulation de Recaptcha -->
-        <script src="https://www.google.com/recaptcha/api.js?render=<?= htmlspecialchars(getVaultSecret("apps/data/avenix/captcha", "public_key")) ?>"></script>
-        <script>
-            grecaptcha.ready(function() {
-                grecaptcha.execute("<?= htmlspecialchars(getVaultSecret("apps/data/avenix/captcha", "public_key")) ?>", { action: "contact_form" }).then(function(token) {
-                    document.getElementById('recaptcha-token').value = token;
-                });
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeCetwqAAAAACLGZPStpdY3c_qcaRoGtQQg22Oh"></script>
+    
+    <!-- S.Contact.6 - Encapsulation de Recaptcha -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeCetwqAAAAACLGZPStpdY3c_qcaRoGtQQg22Oh"></script>
+    <script>
+        grecaptcha.ready(function() {
+            grecaptcha.execute("6LeCetwqAAAAACLGZPStpdY3c_qcaRoGtQQg22Oh", { action: "contact_form" }).then(function(token) {
+                document.getElementById('recaptcha-token').value = token;
             });
-        </script>
-    <?php else: ?>
-        <script>console.error("reCAPTCHA key is missing.");</script>
-    <?php endif; ?>
+        });
+    </script>
+
 </head>
 
 
