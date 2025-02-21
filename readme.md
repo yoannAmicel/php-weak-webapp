@@ -61,22 +61,6 @@ to the project "public" folder:
 
 ---
 
-## Attack Tools 
-
-### Burp (Community edition)
-- **All OS:** [Download page](https://portswigger.net/burp/releases/professional-community-2025-1-1?requestededition=community&requestedplatform=)
-
-### Dirbuster
-- **Linux:** `sudo apt install dirb`
-- **MacOS:** `brew install gobuster` (Unfortunately, dirbuster doesn't exists on MacOS...)
-
-### FFUF (Fuzz Faster U Fool)
-- **Linux:** `sudo apt install ffuf`
-- **MacOS:** `brew install ffuf` 
-- [Documentation](https://github.com/ffuf/ffuf)
-
----
-
 ## Useful commands (for Linux) :
 - **PHP - restart server** : sudo systemctl restart php8.3-fpm
 - **Apache - restart server** : sudo systemctl restart apache2
