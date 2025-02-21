@@ -22,6 +22,12 @@
 
 ## Apache Configuration Prerequisites
 
+### Update `/etc/hosts`
+Open your `/etc/hosts` file with admin privileges before adding these lines:
+```/etc/apache2/sites-enabled/000-default.conf
+::1 avenix.local www.avenix.local
+```
+
 ### Update `php.ini`
 Ensure the following settings are configured:
 ```ini
@@ -30,11 +36,11 @@ upload_max_filesize = 25M
 post_max_size = 30M
 ```
 
-### Update `/etc/apache2/sites-enabled/000-default.conf`
+### Create a dedicated vhost `/etc/apache2/sites-enabled/weak-php.conf`
 Ensure to replace `path_to_local_projet` by your own path:
 ```/etc/apache2/sites-enabled/000-default.conf
-<VirtualHost *:80>
-    ServerName 127.0.0.1
+<VirtualHost *:9998>
+    ServerName avenix.local
     DocumentRoot "/path_to_local_projet/public"
 
     <Directory "/path_to_local_projet">
@@ -46,6 +52,29 @@ Ensure to replace `path_to_local_projet` by your own path:
     CustomLog "/path_to_local_projet/logs/access.log" common
 </VirtualHost>
 ```
+<em>Don't forget to restart Apache afterwards.</em>
+
+### Add an AV exclusion
+For the attacks to proceed correctly, it is necessary to set up exceptions 
+to the project "public" folder:
+- <em>**/path_to_local_projet/public**</em>
+
+---
+
+## Attack Tools 
+
+### Burp (Community edition)
+- **All OS:** [Download page](https://portswigger.net/burp/releases/professional-community-2025-1-1?requestededition=community&requestedplatform=)
+
+### Dirbuster
+- **Linux:** `sudo apt install dirb`
+- **MacOS:** `brew install gobuster` (Unfortunately, dirbuster doesn't exists on MacOS...)
+
+### FFUF (Fuzz Faster U Fool)
+- **Linux:** `sudo apt install ffuf`
+- **MacOS:** `brew install ffuf` 
+- [Documentation](https://github.com/ffuf/ffuf)
+
 ---
 
 ## Useful commands (for Linux) :
@@ -53,3 +82,4 @@ Ensure to replace `path_to_local_projet` by your own path:
 - **Apache - restart server** : sudo systemctl restart apache2
 - **Vault - start server** : sudo vault server -config=/etc/vault/config.hcl
   - _**Vault - server endpoint** : https://127.0.0.1:8200/ui/vault/auth?with=token_
+
