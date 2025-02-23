@@ -70,4 +70,3 @@ to the project "public" folder:
 - **Apache - restart server** : sudo systemctl restart apache2
 - **Vault - start server** : sudo vault server -config=/etc/vault/config.hcl
   - _**Vault - server endpoint** : https://127.0.0.1:8200/ui/vault/auth?with=token_
-
