@@ -3,8 +3,8 @@
 <?php
 
 // Charger la configuration et les fonctions nécessaires
-require_once '../config/config.php';
-require_once '../config/routes.php';
+include_once '../config/config.php';
+include_once '../config/routes.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     ini_set("session.cookie_httponly", 0);

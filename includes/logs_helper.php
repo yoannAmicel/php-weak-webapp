@@ -1,7 +1,7 @@
 <?php
 
     // Inclusion du fichier de configuration 
-    require_once '../config/config.php';
+    include_once '../config/config.php';
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'account_helper.php') {
