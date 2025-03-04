@@ -1,7 +1,7 @@
 <?php
-    require_once '../config/config.php'; 
+    include_once '../config/config.php'; 
     // Inclusion des routes et éventuelles fonctions globales
-    require_once '../config/routes.php'; 
+    include_once '../config/routes.php'; 
 
     // Empêche l'accès direct au fichier (bonne pratique)
     if (basename($_SERVER['PHP_SELF']) === 'header_helper.php') {

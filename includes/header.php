@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <?php 
-    require_once '../includes/header_helper.php'; 
+    include_once '../includes/header_helper.php'; 
 ?>
 
 <head>
